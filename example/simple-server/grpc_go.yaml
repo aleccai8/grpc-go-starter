@@ -1,0 +1,46 @@
+
+global:
+  namespace: ${namespace}
+  container_name: ${container_name}
+  local_ip: ${local_ip}
+
+
+server:
+  app: ${app}
+  server: ${server}
+  ports:
+    http: 8080
+    grpc: 8090
+  filter:
+    - 007
+  service:
+    - name: grpc.${app}.${server}.ExampleService,
+      protocol: grpc
+    - name: grpc.${app}.${server}.ExampleServiceHTTP,
+      protocol: http
+
+#clinet:
+#  filter:
+#    - 007
+#  namespace: ${namespace}
+#  timeout: 1000
+
+
+#plugins:
+#  polaris-registery:
+#    heartbeat_interval: 3000
+#    service:
+#      - name: grpc.one.user_server.UserService
+#        namespace: test
+#        token: token
+#        weight: 100
+#        metadata:
+#          k1: v1
+#          k2: v2
+#      - name: grpc.one.user_server.UserServiceHTTP
+#        namespace: test
+#        token: token
+#        weight: 100
+#        metadata:
+#          k1: v1
+#          k2: v2

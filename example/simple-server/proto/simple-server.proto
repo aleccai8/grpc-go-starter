@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package user_server;
+
+option go_package = "github.com/zhengheng7913/grpc-config/example/simple-server;simple_server";
+
+service UserService{
+
+  rpc Echo(EchoRequest) returns (EchoReply){};
+
+}
+
+message EchoRequest {
+
+}
+
+message EchoReply {
+
+}
