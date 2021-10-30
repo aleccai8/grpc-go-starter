@@ -14,9 +14,11 @@ server:
     - name: grpc.${app}.${server}.UserService
       protocol: grpc
       port: 8000
+      registry: polaris
     - name: grpc.${app}.${server}.UserServiceHTTP
       protocol: http
       port: 9000
+      registry: polaris
       labels:
         target: 127.0.0.1:8000
 
@@ -34,15 +36,12 @@ plugins:
       service:
         - name: grpc.one.user_server.UserService
           namespace: test
+          bind_address: 127.0.0.1:8080
           token: token
           weight: 100
-          metadata:
-            k1: v1
-            k2: v2
         - name: grpc.one.user_server.UserServiceHTTP
           namespace: test
+          bind_address: 127.0.0.1:8090
+          port: 8090
           token: token
           weight: 100
-          metadata:
-            k1: v1
-            k2: v2

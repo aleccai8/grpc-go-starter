@@ -1,8 +1,10 @@
 package server
 
-import "github.com/zhengheng7913/grpc-config/config"
+import (
+	"github.com/zhengheng7913/grpc-config/config"
+)
 
-type ServiceConstructor func(cfg *config.ServiceConfig, opts ...Options) Service
+type ServiceConstructor func(cfg *config.ServiceConfig, opts ...Option) Service
 
 type ServiceType string
 
@@ -14,10 +16,8 @@ type Service interface {
 	Close(chan struct{}) error
 }
 
-type Option interface {
-	Apply(arg ...interface{})
-
+type ServiceOptions interface {
 	ProtocolName() string
-}
 
-type Options func(Option)
+	Apply(inters ...interface{})
+}

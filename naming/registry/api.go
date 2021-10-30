@@ -1,6 +1,8 @@
 package registry
 
-import "sync"
+import (
+	"sync"
+)
 
 var (
 	registries = make(map[string]Registry)
@@ -16,6 +18,5 @@ func Register(name string, s Registry) {
 func Get(name string) Registry {
 	lock.Lock()
 	defer lock.Unlock()
-	delete(registries, name)
-	return nil
+	return registries[name]
 }

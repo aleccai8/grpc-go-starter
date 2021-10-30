@@ -9,11 +9,11 @@ require (
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
-	github.com/zhengheng7913/grpc-config v0.0.0-20211030060156-2480236387f5
+	github.com/zhengheng7913/grpc-config v0.0.0
 	github.com/zhengheng7913/grpc-polaris-plugin v0.0.0
 	google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83
 )
 
-replace github.com/zhengheng7913/grpc-config v0.0.0-20211023200018-c880463f8b11 => ../../../grpc-config
+replace github.com/zhengheng7913/grpc-config v0.0.0 => ../../../grpc-config
 
 replace github.com/zhengheng7913/grpc-polaris-plugin v0.0.0 => /Volumes/Develop/grpc-polaris-plugin

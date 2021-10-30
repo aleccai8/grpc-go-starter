@@ -1,14 +1,16 @@
 package grpc_config
 
 import (
+	"fmt"
 	"github.com/zhengheng7913/grpc-config/config"
 	"github.com/zhengheng7913/grpc-config/filter"
+	"github.com/zhengheng7913/grpc-config/naming/registry"
 	"github.com/zhengheng7913/grpc-config/server"
 	_ "go.uber.org/automaxprocs"
 )
 
 // NewServer 启动时序 初始化server->config->plugin->service
-func NewServer(opts ...server.Options) *server.Server {
+func NewServer(opts ...server.Option) *server.Server {
 
 	path := config.ServerConfigPath()
 
@@ -28,7 +30,7 @@ func NewServer(opts ...server.Options) *server.Server {
 }
 
 //
-func newServiceWithConfig(cfg *config.Config, serviceCfg *config.ServiceConfig, opts ...server.Options) server.Service {
+func newServiceWithConfig(cfg *config.Config, serviceCfg *config.ServiceConfig, opts ...server.Option) server.Service {
 
 	// 填充全局Port默认值
 	if cfg.Server.Port > 0 && serviceCfg.Port == 0 {
@@ -50,6 +52,15 @@ func newServiceWithConfig(cfg *config.Config, serviceCfg *config.ServiceConfig, 
 		filters = append(filters, filter.Get(filterName)...)
 	}
 
+	reg := registry.Get(serviceCfg.Name)
+	if serviceCfg.Registry != "" && reg == nil {
+		fmt.Printf("service:%s registry not exist\n", serviceCfg.Name)
+	}
+
+	opts = append(opts, []server.Option{
+		server.WithRegistry(reg),
+	}...)
+
 	sc := server.Get(serviceCfg.Protocol)
 
 	if sc == nil {
@@ -59,7 +70,7 @@ func newServiceWithConfig(cfg *config.Config, serviceCfg *config.ServiceConfig, 
 	return sc(serviceCfg, opts...)
 }
 
-func NewServerWithConfig(cfg *config.Config, opts ...server.Options) *server.Server {
+func NewServerWithConfig(cfg *config.Config, opts ...server.Option) *server.Server {
 	s := server.NewServer()
 
 	for _, srvCfg := range cfg.Server.Services {

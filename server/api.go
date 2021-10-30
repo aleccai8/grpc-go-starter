@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/zhengheng7913/grpc-config/config"
+	"github.com/zhengheng7913/grpc-config/naming/registry"
 	"google.golang.org/grpc"
 )
 
@@ -28,7 +29,7 @@ func init() {
 	Register(ProtocolNameHTTP, NewHttpService)
 }
 
-func NewHttpService(cfg *config.ServiceConfig, opts ...Options) Service {
+func NewHttpService(cfg *config.ServiceConfig, opts ...Option) Service {
 	return &ServiceHTTP{
 		cfg: cfg,
 	}
@@ -37,9 +38,12 @@ func NewHttpServiceDesc(registrar RegistrarHTTP) *ServiceDescHTTP {
 	return &ServiceDescHTTP{registrar: registrar}
 }
 
-func NewGrpcService(cfg *config.ServiceConfig, opts ...Options) Service {
+func NewGrpcService(cfg *config.ServiceConfig, opts ...Option) Service {
 	// 初始化GrpcServer
-	gOption := &OptionGRPC{}
+	gOption := &Options{
+		ServiceConfig:  cfg,
+		ServiceOptions: &OptionsGRPC{},
+	}
 	for _, f := range opts {
 		f(gOption)
 	}
@@ -53,8 +57,15 @@ func WithServiceRegisterAdapter(srv Service) grpc.ServiceRegistrar {
 	return newServiceRegisterAdapter(srv)
 }
 
-func WithGrpcOptions(serviceName string, option ...grpc.ServerOption) Options {
-	return func(opt Option) {
-		opt.Apply(dessertGrpcOptions(option...))
+func WithGrpcOptions(serviceName string, option ...grpc.ServerOption) Option {
+	return func(opt *Options) {
+		opt.ServiceOptions.Apply(dessertGrpcOptions(option...))
+	}
+}
+
+// WithRegistry 指定server服务注册中心, 一个服务只能支持一个registry
+func WithRegistry(r registry.Registry) Option {
+	return func(opt *Options) {
+		opt.Registry = r
 	}
 }

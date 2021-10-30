@@ -47,7 +47,10 @@ func (s *ServiceHTTP) Serve() error {
 		Addr:    ":8090",
 		Handler: s.serveMux,
 	}
-	return s.server.ListenAndServe()
+	go func() {
+		s.server.ListenAndServe()
+	}()
+	return nil
 }
 
 func (s ServiceHTTP) Close(c chan struct{}) error {

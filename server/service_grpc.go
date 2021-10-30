@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/zhengheng7913/grpc-config/config"
 	"google.golang.org/grpc"
+	"log"
 	"net"
 )
 
@@ -17,7 +18,7 @@ func newServiceRegisterAdapter(srv Service) grpc.ServiceRegistrar {
 type ServiceGRPC struct {
 	server *grpc.Server
 	cfg    *config.ServiceConfig
-	opt    *OptionGRPC
+	opt    *Options
 }
 
 func (g *ServiceGRPC) Register(serviceDesc interface{}, serviceImpl interface{}) {
@@ -26,7 +27,7 @@ func (g *ServiceGRPC) Register(serviceDesc interface{}, serviceImpl interface{})
 		fmt.Println(errors.New("service desc type invalid"))
 		return
 	}
-	opts := g.opt.Get()
+	opts := g.opt.ServiceOptions.(*OptionsGRPC).Get()
 	g.server = grpc.NewServer(opts...)
 	g.server.RegisterService(desc, serviceImpl)
 }
@@ -36,13 +37,17 @@ func (g *ServiceGRPC) Serve() error {
 	if err != nil {
 		return fmt.Errorf("Failed to listen: %v ", err)
 	}
-	//go func() {
-	//	err := g.server.Serve(lis)
-	//	if err != nil {
-	//		log.Fatalln(err)
-	//	}
-	//}()
-	g.server.Serve(lis)
+	go func() {
+		err := g.server.Serve(lis)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}()
+
+	err = g.opt.Registry.Register(g.opt.ServiceConfig.Name)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -58,16 +63,15 @@ func (s *ServiceRegisterAdapter) RegisterService(desc *grpc.ServiceDesc, impl in
 	s.service.Register(desc, impl)
 }
 
-type OptionGRPC struct {
-	serviceName string
-	opts        []grpc.ServerOption
+type OptionsGRPC struct {
+	opts []grpc.ServerOption
 }
 
-func (o OptionGRPC) ProtocolName() string {
+func (o OptionsGRPC) ProtocolName() string {
 	return ProtocolNameGrpc
 }
 
-func (o *OptionGRPC) Apply(inters ...interface{}) {
+func (o *OptionsGRPC) Apply(inters ...interface{}) {
 	gOpts, ok := assertGrpcOptions(inters)
 	if !ok {
 		panic("unknown service type")
@@ -75,7 +79,7 @@ func (o *OptionGRPC) Apply(inters ...interface{}) {
 	o.opts = append(o.opts, gOpts...)
 }
 
-func (o *OptionGRPC) Get() []grpc.ServerOption {
+func (o *OptionsGRPC) Get() []grpc.ServerOption {
 	return o.opts
 }
 
