@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	ExampleService     = "grpc.examples.simple-server.ExampleService"
-	ExampleServiceHTTP = "grpc.examples.simple-server.ExampleServiceHTTP"
+	ExampleService     = "grpc.one.user_server.UserService"
+	ExampleServiceHTTP = "grpc.one.user_server.UserServiceHTTP"
 )
 
 type EchoServiceImpl struct {

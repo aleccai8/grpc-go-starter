@@ -1,4 +1,4 @@
 #!/bin/bash
 go build .
-export app='examples' server="simple-server"
+export app='one' server="user_server"
 ./simple-server

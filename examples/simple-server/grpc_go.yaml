@@ -11,10 +11,10 @@ server:
   filters:
     - 007
   services:
-    - name: grpc.${app}.${server}.ExampleService
+    - name: grpc.${app}.${server}.UserService
       protocol: grpc
       port: 8000
-    - name: grpc.${app}.${server}.ExampleServiceHTTP
+    - name: grpc.${app}.${server}.UserServiceHTTP
       protocol: http
       port: 9000
       labels:
@@ -27,21 +27,22 @@ server:
 #  timeout: 1000
 
 
-#plugins:
-#  polaris-registery:
-#    heartbeat_interval: 3000
-#    service:
-#      - name: grpc.one.user_server.UserService
-#        namespace: test
-#        token: token
-#        weight: 100
-#        metadata:
-#          k1: v1
-#          k2: v2
-#      - name: grpc.one.user_server.UserServiceHTTP
-#        namespace: test
-#        token: token
-#        weight: 100
-#        metadata:
-#          k1: v1
-#          k2: v2
+plugins:
+  registry:
+    polaris:
+      heartbeat_interval: 3000
+      service:
+        - name: grpc.one.user_server.UserService
+          namespace: test
+          token: token
+          weight: 100
+          metadata:
+            k1: v1
+            k2: v2
+        - name: grpc.one.user_server.UserServiceHTTP
+          namespace: test
+          token: token
+          weight: 100
+          metadata:
+            k1: v1
+            k2: v2
