@@ -27,7 +27,6 @@ func getShellName(s string) (string, int) {
 
 // RepairServerConfig 修复配置数据，填充默认值
 func repairServerConfig(cfg *Config) error {
-
 	return nil
 }
 

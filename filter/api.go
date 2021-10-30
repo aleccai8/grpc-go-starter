@@ -5,10 +5,6 @@ import (
 	"sync"
 )
 
-const (
-	GlobalFilterName = "global_filter"
-)
-
 var (
 	chains = make(map[string][]server.Options)
 	lock   = sync.RWMutex{}

@@ -3,7 +3,6 @@ package grpc_config
 import (
 	"github.com/zhengheng7913/grpc-config/config"
 	"github.com/zhengheng7913/grpc-config/filter"
-	"github.com/zhengheng7913/grpc-config/protocol"
 	"github.com/zhengheng7913/grpc-config/server"
 	_ "go.uber.org/automaxprocs"
 )
@@ -31,22 +30,37 @@ func NewServer(opts ...server.Options) *server.Server {
 //
 func newServiceWithConfig(cfg *config.Config, serviceCfg *config.ServiceConfig, opts ...server.Options) server.Service {
 
-	// 这里需要获取自定义grpc的全局组件 filter registry
-	gFilter := filter.Get(filter.GlobalFilterName)
+	// 填充全局Port默认值
+	if cfg.Server.Port > 0 && serviceCfg.Port == 0 {
+		serviceCfg.Port = cfg.Server.Port
+	}
 
-	opts = append(opts, gFilter...)
+	filterNum := len(cfg.Server.Filter)
+	if filterNum > 0 {
+		filters := make([]string, filterNum+len(serviceCfg.Filters))
+		filters = append(filters, cfg.Server.Filter...)
+		filters = append(filters, serviceCfg.Filters...)
+		serviceCfg.Filters = filters
+	}
 
-	constructor := protocol.Get(serviceCfg.Protocol)
+	//注入所有filter
+	filters := make([]server.Options, len(serviceCfg.Filters))
 
-	if constructor == nil {
+	for _, filterName := range serviceCfg.Filters {
+		filters = append(filters, filter.Get(filterName)...)
+	}
+
+	sc := server.Get(serviceCfg.Protocol)
+
+	if sc == nil {
 		panic("can not get service constructor:" + serviceCfg.Name)
 	}
 
-	return constructor(opts...)
+	return sc(serviceCfg, opts...)
 }
 
 func NewServerWithConfig(cfg *config.Config, opts ...server.Options) *server.Server {
-	s := &server.Server{}
+	s := server.NewServer()
 
 	for _, srvCfg := range cfg.Server.Services {
 		s.AddService(srvCfg.Name, newServiceWithConfig(cfg, srvCfg, opts...))

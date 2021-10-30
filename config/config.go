@@ -24,22 +24,24 @@ type Config struct {
 		LocalIP       string `yaml:"local_ip"`
 	}
 	Server struct {
-		App      string
-		Server   string
-		Protocol string   // 针对所有service的protocol 默认trpc
-		Filter   []string // 针对所有service的拦截器
-		Services []*ServiceConfig
+		App      string           `yaml:"app"'`
+		Server   string           `yaml:"server"`
+		Protocol string           `yaml:"protocol"` // 针对所有service的protocol 默认grpc
+		Port     uint16           `yaml:"port"`
+		Filter   []string         `yaml:"filter"` // 针对所有service的拦截器
+		Services []*ServiceConfig `yaml:"services"`
 	}
 	Client  ClientConfig
 	Plugins plugin.Config
 }
 
 type ServiceConfig struct {
-	Name     string
-	Protocol string
-	Port     uint16
-	Registry string
-	Filter   []string
+	Name     string            `yaml:"name"`
+	Protocol string            `yaml:"protocol"`
+	Port     uint16            `yaml:"port"`
+	Registry string            `yaml:"registry"`
+	Filters  []string          `yaml:"filters"`
+	Labels   map[string]string `yaml:"labels"`
 }
 
 type ClientConfig struct {

@@ -37,5 +37,13 @@ func LoadConfig(path string) (*Config, error) {
 
 // Setup 加载全局配置，加载插件
 func Setup(cfg *Config) error {
+
+	// 装载插件
+	if cfg.Plugins != nil {
+		if err := cfg.Plugins.Setup(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

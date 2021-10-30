@@ -1,23 +1,23 @@
 package server
 
-type ServiceConstructor func(opts ...Options) Service
+import "github.com/zhengheng7913/grpc-config/config"
+
+type ServiceConstructor func(cfg *config.ServiceConfig, opts ...Options) Service
 
 type ServiceType string
 
 type Service interface {
-	Register(serviceDesc *ServiceDesc, serviceImpl interface{}) error
+	Register(serviceDesc interface{}, serviceImpl interface{})
 
 	Serve() error
 
 	Close(chan struct{}) error
 }
 
-const (
-	ServiceMethodGrpc = "grpc"
-	ServiceMethodHttp = "http"
-)
+type Option interface {
+	Apply(arg ...interface{})
 
-type ServiceDesc struct {
-	ServiceName string
-	Method      ServiceType
+	ProtocolName() string
 }
+
+type Options func(Option)

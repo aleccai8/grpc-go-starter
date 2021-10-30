@@ -8,16 +8,17 @@ global:
 server:
   app: ${app}
   server: ${server}
-  ports:
-    http: 8080
-    grpc: 8090
-  filter:
+  filters:
     - 007
-  service:
-    - name: grpc.${app}.${server}.ExampleService,
+  services:
+    - name: grpc.${app}.${server}.ExampleService
       protocol: grpc
-    - name: grpc.${app}.${server}.ExampleServiceHTTP,
+      port: 8000
+    - name: grpc.${app}.${server}.ExampleServiceHTTP
       protocol: http
+      port: 9000
+      labels:
+        target: 127.0.0.1:8000
 
 #clinet:
 #  filter:

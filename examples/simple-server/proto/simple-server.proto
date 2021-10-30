@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package simple_server;
+
+option go_package = "github.com/zhengheng7913/grpc-config/examples/simple-server/proto;proto";
+
+import "google/api/annotations.proto";
+
+
+service EchoService{
+
+  rpc Echo(EchoRequest) returns (EchoReply){
+    option (google.api.http) = {
+      post: "/echo"
+      body: "*"
+    };
+  };
+
+}
+
+message EchoRequest {
+
+}
+
+message EchoReply {
+  string message = 1;
+}
