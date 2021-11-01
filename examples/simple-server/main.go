@@ -19,6 +19,5 @@ func main() {
 		server.NewHttpServiceDesc(proto.RegisterEchoServiceHandler),
 		nil,
 	)
-
 	s.Serve()
 }

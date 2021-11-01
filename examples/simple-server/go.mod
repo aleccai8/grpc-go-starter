@@ -9,6 +9,7 @@ require (
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
+	github.com/polarismesh/polaris-go v1.0.0 // indirect
 	github.com/zhengheng7913/grpc-config v0.0.0
 	github.com/zhengheng7913/grpc-polaris-plugin v0.0.0
 	google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83

@@ -15,25 +15,25 @@ func newServiceRegisterAdapter(srv Service) grpc.ServiceRegistrar {
 	}
 }
 
-type ServiceGRPC struct {
+type GrpcService struct {
 	server *grpc.Server
 	cfg    *config.ServiceConfig
 	opt    *Options
 }
 
-func (g *ServiceGRPC) Register(serviceDesc interface{}, serviceImpl interface{}) {
+func (g *GrpcService) Register(serviceDesc interface{}, serviceImpl interface{}) {
 	desc, ok := serviceDesc.(*grpc.ServiceDesc)
 	if !ok {
 		fmt.Println(errors.New("service desc type invalid"))
 		return
 	}
-	opts := g.opt.ServiceOptions.(*OptionsGRPC).Get()
+	opts := g.opt.ServiceOptions.(*GrpcOptions).Opts
 	g.server = grpc.NewServer(opts...)
 	g.server.RegisterService(desc, serviceImpl)
 }
 
-func (g *ServiceGRPC) Serve() error {
-	lis, err := net.Listen("tcp", ":8000")
+func (g *GrpcService) Serve() error {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", g.cfg.Port))
 	if err != nil {
 		return fmt.Errorf("Failed to listen: %v ", err)
 	}
@@ -44,15 +44,16 @@ func (g *ServiceGRPC) Serve() error {
 		}
 	}()
 
-	err = g.opt.Registry.Register(g.opt.ServiceConfig.Name)
+	err = g.opt.Registry.Register(g.cfg.Name)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (g *ServiceGRPC) Close(c chan struct{}) error {
-	panic("implement me")
+func (g *GrpcService) Close(c chan struct{}) error {
+	g.server.Stop()
+	return nil
 }
 
 type ServiceRegisterAdapter struct {
@@ -63,24 +64,20 @@ func (s *ServiceRegisterAdapter) RegisterService(desc *grpc.ServiceDesc, impl in
 	s.service.Register(desc, impl)
 }
 
-type OptionsGRPC struct {
-	opts []grpc.ServerOption
+type GrpcOptions struct {
+	Opts []grpc.ServerOption
 }
 
-func (o OptionsGRPC) ProtocolName() string {
+func (o GrpcOptions) ProtocolName() string {
 	return ProtocolNameGrpc
 }
 
-func (o *OptionsGRPC) Apply(inters ...interface{}) {
-	gOpts, ok := assertGrpcOptions(inters)
+func (o *GrpcOptions) Apply(inters ...interface{}) {
+	gOpts, ok := assertGrpcOptions(inters...)
 	if !ok {
 		panic("unknown service type")
 	}
-	o.opts = append(o.opts, gOpts...)
-}
-
-func (o *OptionsGRPC) Get() []grpc.ServerOption {
-	return o.opts
+	o.Opts = append(o.Opts, gOpts...)
 }
 
 func assertGrpcOptions(inters ...interface{}) ([]grpc.ServerOption, bool) {

@@ -1,4 +1,0 @@
-global:
-  serverConnector:
-    addresses:
-      - 152.136.190.108:31917

@@ -8,19 +8,19 @@ global:
 server:
   app: ${app}
   server: ${server}
-  filters:
-    - 007
   services:
-    - name: grpc.${app}.${server}.UserService
-      protocol: grpc
-      port: 8000
-      registry: polaris
     - name: grpc.${app}.${server}.UserServiceHTTP
       protocol: http
-      port: 9000
+      port: 8080
+      filters:
+        - http-error
       registry: polaris
       labels:
-        target: 127.0.0.1:8000
+        target: 127.0.0.1:8090
+    - name: grpc.${app}.${server}.UserService
+      protocol: grpc
+      port: 8090
+      registry: polaris
 
 #clinet:
 #  filter:
@@ -33,15 +33,13 @@ plugins:
   registry:
     polaris:
       heartbeat_interval: 3000
+      address_list: 152.136.190.108:31917
       service:
+        - name: grpc.one.user_server.UserServiceHTTP
+          namespace: test
+          protocol: http
+          bind_address: 127.0.0.1:8090
+          port: 8090
         - name: grpc.one.user_server.UserService
           namespace: test
           bind_address: 127.0.0.1:8080
-          token: token
-          weight: 100
-        - name: grpc.one.user_server.UserServiceHTTP
-          namespace: test
-          bind_address: 127.0.0.1:8090
-          port: 8090
-          token: token
-          weight: 100

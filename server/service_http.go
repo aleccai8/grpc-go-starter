@@ -7,33 +7,33 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/zhengheng7913/grpc-config/config"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"net/http"
-	"strconv"
 )
 
-type ServiceHTTP struct {
+type HttpService struct {
 	desc     *ServiceDescHTTP
 	cfg      *config.ServiceConfig
 	server   *http.Server
 	serveMux *runtime.ServeMux
 	dialConn *grpc.ClientConn
+	opt      *Options
 }
 
-func (s *ServiceHTTP) Register(serviceDesc interface{}, nil interface{}) {
+func (s *HttpService) Register(serviceDesc interface{}, nil interface{}) {
 	desc, ok := serviceDesc.(*ServiceDescHTTP)
 	if !ok {
 		fmt.Println(errors.New("service desc type invalid"))
 		return
 	}
 	s.desc = desc
+	opts := s.opt.ServiceOptions.(*HttpOptions).Opts
+	s.serveMux = runtime.NewServeMux(opts...)
 }
 
-func (s *ServiceHTTP) Serve() error {
+func (s *HttpService) Serve() error {
 	conn, err := grpc.DialContext(
 		context.Background(),
-		"0.0.0.0:8000",
+		s.cfg.Labels["target"],
 		grpc.WithBlock(),
 		grpc.WithInsecure(),
 	)
@@ -41,49 +41,51 @@ func (s *ServiceHTTP) Serve() error {
 		return err
 	}
 	s.dialConn = conn
-	s.serveMux = runtime.NewServeMux()
 	err = s.desc.registrar(context.Background(), s.serveMux, s.dialConn)
 	s.server = &http.Server{
-		Addr:    ":8090",
+		Addr:    fmt.Sprintf(":%v", s.cfg.Port),
 		Handler: s.serveMux,
 	}
 	go func() {
-		s.server.ListenAndServe()
+		err := s.server.ListenAndServe()
+		if err != nil {
+			return
+		}
 	}()
+	err = s.opt.Registry.Register(s.cfg.Name)
 	return nil
 }
 
-func (s ServiceHTTP) Close(c chan struct{}) error {
-	panic("implement me")
+func (s HttpService) Close(c chan struct{}) error {
+	return s.server.Close()
 }
 
-type RegistrarHTTP func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
+type HttpRegistrar func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
 
 type ServiceDescHTTP struct {
-	registrar RegistrarHTTP
+	registrar HttpRegistrar
 }
 
-type OptionHTTP struct {
-	serviceName    string
-	serveMuxOption runtime.ServeMuxOption
+type HttpOptions struct {
+	Opts []runtime.ServeMuxOption
 }
 
-func (o OptionHTTP) Apply(arg ...interface{}) {
-	panic("implement me")
+func (o *HttpOptions) Apply(arg ...interface{}) {
+	opts, ok := assertHttpOptions(arg...)
+	if !ok {
+		panic("unknown service type")
+	}
+	o.Opts = append(o.Opts, opts...)
 }
 
-func (o OptionHTTP) ServiceName() string {
-	return o.serviceName
-}
-
-func (o OptionHTTP) ProtocolName() string {
+func (o HttpOptions) ProtocolName() string {
 	return ProtocolNameHTTP
 }
 
-func assertOptions(inters ...interface{}) ([]Option, bool) {
-	opts := make([]Option, len(inters))
+func assertHttpOptions(inters ...interface{}) ([]runtime.ServeMuxOption, bool) {
+	opts := make([]runtime.ServeMuxOption, 0)
 	for _, inter := range inters {
-		opt, ok := inter.(Option)
+		opt, ok := inter.(runtime.ServeMuxOption)
 		if !ok {
 			return nil, false
 		}
@@ -92,53 +94,10 @@ func assertOptions(inters ...interface{}) ([]Option, bool) {
 	return opts, true
 }
 
-func dessertOptions(opts ...runtime.ServeMuxOption) []interface{} {
+func dessertHttpOptions(opts ...runtime.ServeMuxOption) []interface{} {
 	inters := make([]interface{}, len(opts))
 	for _, opt := range opts {
 		inters = append(inters, opt)
 	}
 	return inters
-}
-
-const (
-	HeaderErrorMsg  = "grpc-error-msg"
-	HeaderErrorCode = "grpc-error-code"
-)
-
-type ErrorHandlerHTTP struct {
-}
-
-func (h ErrorHandlerHTTP) Apply(arg ...interface{}) {
-	panic("implement me")
-}
-
-func (h ErrorHandlerHTTP) ProtocolName() string {
-	return "http"
-}
-
-func httpErrorHandler(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error) {
-
-	var customStatus *runtime.HTTPStatusError
-	if errors.As(err, &customStatus) {
-		err = customStatus.Err
-	}
-
-	s := status.Convert(err)
-
-	w.Header().Del("Trailer")
-	w.Header().Del("Transfer-Encoding")
-
-	if s.Code() == codes.Unauthenticated {
-		w.Header().Set("WWW-Authenticate", s.Message())
-	}
-
-	w.Header().Set(HeaderErrorMsg, s.Message())
-	w.Header().Set(HeaderErrorCode, strconv.Itoa(int(s.Code())))
-
-	st := runtime.HTTPStatusFromCode(s.Code())
-	if customStatus != nil {
-		st = customStatus.HTTPStatus
-	}
-
-	w.WriteHeader(st)
 }

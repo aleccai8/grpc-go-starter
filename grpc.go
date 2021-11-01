@@ -32,24 +32,20 @@ func NewServer(opts ...server.Option) *server.Server {
 //
 func newServiceWithConfig(cfg *config.Config, serviceCfg *config.ServiceConfig, opts ...server.Option) server.Service {
 
+	var (
+		filters []filter.Filter
+	)
 	// 填充全局Port默认值
 	if cfg.Server.Port > 0 && serviceCfg.Port == 0 {
 		serviceCfg.Port = cfg.Server.Port
 	}
 
-	filterNum := len(cfg.Server.Filter)
-	if filterNum > 0 {
-		filters := make([]string, filterNum+len(serviceCfg.Filters))
-		filters = append(filters, cfg.Server.Filter...)
-		filters = append(filters, serviceCfg.Filters...)
-		serviceCfg.Filters = filters
-	}
-
-	//注入所有filter
-	filters := make([]server.Options, len(serviceCfg.Filters))
-
-	for _, filterName := range serviceCfg.Filters {
-		filters = append(filters, filter.Get(filterName)...)
+	for _, name := range Deduplicate(cfg.Server.Filters, serviceCfg.Filters) { // 全局filter在前，且去重
+		f := filter.GetServer(name)
+		if f == nil {
+			panic(fmt.Sprintf("filter %s no registered, do not configure", name))
+		}
+		filters = append(filters, f)
 	}
 
 	reg := registry.Get(serviceCfg.Name)
@@ -57,9 +53,10 @@ func newServiceWithConfig(cfg *config.Config, serviceCfg *config.ServiceConfig, 
 		fmt.Printf("service:%s registry not exist\n", serviceCfg.Name)
 	}
 
-	opts = append(opts, []server.Option{
+	opts = append(opts,
 		server.WithRegistry(reg),
-	}...)
+		server.WithFilters(filters),
+	)
 
 	sc := server.Get(serviceCfg.Protocol)
 

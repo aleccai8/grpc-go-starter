@@ -28,7 +28,7 @@ type Config struct {
 		Server   string           `yaml:"server"`
 		Protocol string           `yaml:"protocol"` // 针对所有service的protocol 默认grpc
 		Port     uint16           `yaml:"port"`
-		Filter   []string         `yaml:"filter"` // 针对所有service的拦截器
+		Filters  []string         `yaml:"filters"` // 针对所有service的拦截器
 		Services []*ServiceConfig `yaml:"services"`
 	}
 	Client  ClientConfig

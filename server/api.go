@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/zhengheng7913/grpc-config/config"
+	"github.com/zhengheng7913/grpc-config/filter"
 	"github.com/zhengheng7913/grpc-config/naming/registry"
 	"google.golang.org/grpc"
 )
@@ -30,24 +31,31 @@ func init() {
 }
 
 func NewHttpService(cfg *config.ServiceConfig, opts ...Option) Service {
-	return &ServiceHTTP{
+	gOption := &Options{
+		ServiceOptions: &HttpOptions{},
+	}
+	for _, f := range opts {
+		f(gOption)
+	}
+	return &HttpService{
+		opt: gOption,
 		cfg: cfg,
 	}
 }
-func NewHttpServiceDesc(registrar RegistrarHTTP) *ServiceDescHTTP {
+
+func NewHttpServiceDesc(registrar HttpRegistrar) *ServiceDescHTTP {
 	return &ServiceDescHTTP{registrar: registrar}
 }
 
 func NewGrpcService(cfg *config.ServiceConfig, opts ...Option) Service {
 	// 初始化GrpcServer
 	gOption := &Options{
-		ServiceConfig:  cfg,
-		ServiceOptions: &OptionsGRPC{},
+		ServiceOptions: &GrpcOptions{},
 	}
 	for _, f := range opts {
 		f(gOption)
 	}
-	return &ServiceGRPC{
+	return &GrpcService{
 		opt: gOption,
 		cfg: cfg,
 	}
@@ -67,5 +75,11 @@ func WithGrpcOptions(serviceName string, option ...grpc.ServerOption) Option {
 func WithRegistry(r registry.Registry) Option {
 	return func(opt *Options) {
 		opt.Registry = r
+	}
+}
+
+func WithFilters(fs filter.Chain) Option {
+	return func(o *Options) {
+		o.ServiceOptions.Apply(fs...)
 	}
 }

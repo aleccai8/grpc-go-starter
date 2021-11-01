@@ -6,6 +6,7 @@ type Registry interface {
 }
 
 type Options struct {
+	Address string
 }
 
 type Option func(*Options)
