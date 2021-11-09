@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 
-	"github.com/zhengheng7913/grpc-go-starter/config"
 	"google.golang.org/grpc"
 )
 
@@ -18,7 +17,7 @@ func newServiceRegisterAdapter(srv Service) grpc.ServiceRegistrar {
 
 type GrpcService struct {
 	server *grpc.Server
-	cfg    *config.ServiceConfig
+	cfg    *ServiceConfig
 	opt    *Options
 }
 
@@ -28,7 +27,9 @@ func (g *GrpcService) Register(serviceDesc interface{}, serviceImpl interface{})
 		fmt.Println(errors.New("service desc type invalid"))
 		return
 	}
-	opts := g.opt.ServiceOptions.(*GrpcOptions).Opts
+	filters, _ := assertGrpcOptions(g.opt.Filters)
+	opts, _ := assertGrpcOptions(g.opt.Customs)
+	opts = append(opts, filters...)
 	g.server = grpc.NewServer(opts...)
 	g.server.RegisterService(desc, serviceImpl)
 }
@@ -63,22 +64,6 @@ type ServiceRegisterAdapter struct {
 
 func (s *ServiceRegisterAdapter) RegisterService(desc *grpc.ServiceDesc, impl interface{}) {
 	s.service.Register(desc, impl)
-}
-
-type GrpcOptions struct {
-	Opts []grpc.ServerOption
-}
-
-func (o GrpcOptions) ProtocolName() string {
-	return ProtocolNameGrpc
-}
-
-func (o *GrpcOptions) Apply(inters ...interface{}) {
-	gOpts, ok := assertGrpcOptions(inters...)
-	if !ok {
-		panic("unknown service type")
-	}
-	o.Opts = append(o.Opts, gOpts...)
 }
 
 func assertGrpcOptions(inters ...interface{}) ([]grpc.ServerOption, bool) {

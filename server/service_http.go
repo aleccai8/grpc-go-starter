@@ -7,13 +7,17 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/zhengheng7913/grpc-go-starter/config"
 	"google.golang.org/grpc"
 )
 
+type HttpServiceConfig struct {
+	ServiceConfig
+	Target string `yaml:"target"`
+}
+
 type HttpService struct {
 	desc     *ServiceDescHTTP
-	cfg      *config.ServiceConfig
+	cfg      *HttpServiceConfig
 	server   *http.Server
 	serveMux *runtime.ServeMux
 	dialConn *grpc.ClientConn
@@ -27,14 +31,16 @@ func (s *HttpService) Register(serviceDesc interface{}, nil interface{}) {
 		return
 	}
 	s.desc = desc
-	opts := s.opt.ServiceOptions.(*HttpOptions).Opts
+	filters, _ := assertHttpOptions(s.opt.Filters)
+	opts, _ := assertHttpOptions(s.opt.Customs)
+	opts = append(opts, filters...)
 	s.serveMux = runtime.NewServeMux(opts...)
 }
 
 func (s *HttpService) Serve() error {
 	conn, err := grpc.DialContext(
 		context.Background(),
-		s.cfg.Labels["target"],
+		s.cfg.Target,
 		grpc.WithBlock(),
 		grpc.WithInsecure(),
 	)
@@ -65,22 +71,6 @@ type HttpRegistrar func(context.Context, *runtime.ServeMux, *grpc.ClientConn) er
 
 type ServiceDescHTTP struct {
 	registrar HttpRegistrar
-}
-
-type HttpOptions struct {
-	Opts []runtime.ServeMuxOption
-}
-
-func (o *HttpOptions) Apply(arg ...interface{}) {
-	opts, ok := assertHttpOptions(arg...)
-	if !ok {
-		panic("unknown service type")
-	}
-	o.Opts = append(o.Opts, opts...)
-}
-
-func (o HttpOptions) ProtocolName() string {
-	return ProtocolNameHTTP
 }
 
 func assertHttpOptions(inters ...interface{}) ([]runtime.ServeMuxOption, bool) {

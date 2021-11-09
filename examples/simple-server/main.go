@@ -1,14 +1,14 @@
 package main
 
 import (
-	grpc_config "github.com/zhengheng7913/grpc-go-starter"
+	grpc_go_starter "github.com/zhengheng7913/grpc-go-starter"
 	"github.com/zhengheng7913/grpc-go-starter/examples/simple-server/proto"
 	"github.com/zhengheng7913/grpc-go-starter/server"
 	_ "github.com/zhengheng7913/grpc-polaris-plugin/registry"
 )
 
 func main() {
-	s := grpc_config.NewServer()
+	s := grpc_go_starter.NewServer()
 
 	proto.RegisterEchoServiceServer(
 		server.WithServiceRegisterAdapter(s.Service(ExampleService)),

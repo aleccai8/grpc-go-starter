@@ -1,4 +1,4 @@
-package grpc_config
+package grpc_go_starter
 
 // Deduplicate 将a和b中的字符串按顺序连在一起，且去重
 func Deduplicate(a, b []string) []string {
