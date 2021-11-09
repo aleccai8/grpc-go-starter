@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/zhengheng7913/grpc-config/config"
-	"github.com/zhengheng7913/grpc-config/filter"
-	"github.com/zhengheng7913/grpc-config/naming/registry"
+	"github.com/zhengheng7913/grpc-go-starter/config"
+	"github.com/zhengheng7913/grpc-go-starter/filter"
+	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
 	"google.golang.org/grpc"
 )
 

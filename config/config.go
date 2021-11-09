@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/zhengheng7913/grpc-config/plugin"
 	"sync/atomic"
+
+	"github.com/zhengheng7913/grpc-go-starter/plugin"
 )
 
 const defaultConfigPath = "./grpc_go.yaml"

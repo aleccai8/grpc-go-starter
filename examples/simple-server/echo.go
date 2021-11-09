@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"github.com/zhengheng7913/grpc-config/examples/simple-server/proto"
+
+	"github.com/zhengheng7913/grpc-go-starter/examples/simple-server/proto"
 )
 
 var (

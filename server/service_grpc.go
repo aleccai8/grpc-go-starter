@@ -3,10 +3,11 @@ package server
 import (
 	"errors"
 	"fmt"
-	"github.com/zhengheng7913/grpc-config/config"
-	"google.golang.org/grpc"
 	"log"
 	"net"
+
+	"github.com/zhengheng7913/grpc-go-starter/config"
+	"google.golang.org/grpc"
 )
 
 func newServiceRegisterAdapter(srv Service) grpc.ServiceRegistrar {

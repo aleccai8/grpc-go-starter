@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/zhengheng7913/grpc-config"
-	"github.com/zhengheng7913/grpc-config/examples/simple-server/proto"
-	"github.com/zhengheng7913/grpc-config/server"
+	grpc_config "github.com/zhengheng7913/grpc-go-starter"
+	"github.com/zhengheng7913/grpc-go-starter/examples/simple-server/proto"
+	"github.com/zhengheng7913/grpc-go-starter/server"
 	_ "github.com/zhengheng7913/grpc-polaris-plugin/registry"
 )
 

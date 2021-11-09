@@ -187,8 +187,8 @@ github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9de
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
-github.com/zhengheng7913/grpc-config v0.0.0-20211030060156-2480236387f5 h1:8la9p9k0miZnJthXoCSxPrlpFEM4OB/HfMsA6Sz/jFQ=
-github.com/zhengheng7913/grpc-config v0.0.0-20211030060156-2480236387f5/go.mod h1:CvZOvyVM6gGxN8f8gRt/7J5BZSFC4ZGHiBwE8/wzaZ8=
+github.com/zhengheng7913/grpc-go-starter v0.0.0-20211030060156-2480236387f5 h1:8la9p9k0miZnJthXoCSxPrlpFEM4OB/HfMsA6Sz/jFQ=
+github.com/zhengheng7913/grpc-go-starter v0.0.0-20211030060156-2480236387f5/go.mod h1:CvZOvyVM6gGxN8f8gRt/7J5BZSFC4ZGHiBwE8/wzaZ8=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
 go.opencensus.io v0.22.2/go.mod h1:yxeiOL68Rb0Xd1ddK5vPZ/oVn4vY4Ynel7k9FzqtOIw=

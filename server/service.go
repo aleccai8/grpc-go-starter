@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/zhengheng7913/grpc-config/config"
+	"github.com/zhengheng7913/grpc-go-starter/config"
 )
 
 type ServiceConstructor func(cfg *config.ServiceConfig, opts ...Option) Service

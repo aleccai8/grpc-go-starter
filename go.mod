@@ -1,4 +1,4 @@
-module github.com/zhengheng7913/grpc-config
+module github.com/zhengheng7913/grpc-go-starter
 
 go 1.17
 

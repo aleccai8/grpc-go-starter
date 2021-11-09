@@ -2,10 +2,11 @@ package grpc_config
 
 import (
 	"fmt"
-	"github.com/zhengheng7913/grpc-config/config"
-	"github.com/zhengheng7913/grpc-config/filter"
-	"github.com/zhengheng7913/grpc-config/naming/registry"
-	"github.com/zhengheng7913/grpc-config/server"
+
+	"github.com/zhengheng7913/grpc-go-starter/config"
+	"github.com/zhengheng7913/grpc-go-starter/filter"
+	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
+	"github.com/zhengheng7913/grpc-go-starter/server"
 	_ "go.uber.org/automaxprocs"
 )
 

@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/zhengheng7913/grpc-config/naming/registry"
+	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
 )
 
 type Options struct {
