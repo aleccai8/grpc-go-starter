@@ -15,8 +15,7 @@ server:
       filters:
         - http-error
       registry: polaris
-      labels:
-        target: 127.0.0.1:8090
+      target: 127.0.0.1:8090
     - name: grpc.${app}.${server}.UserService
       protocol: grpc
       port: 8090

@@ -2,11 +2,27 @@ package server
 
 import (
 	"github.com/zhengheng7913/grpc-go-starter/config"
+	"github.com/zhengheng7913/grpc-go-starter/filter"
+	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
 )
 
-type ServiceConstructor func(cfg *config.ServiceConfig, opts ...Option) Service
+type ServiceConstructor func(starter *ServiceStarter, opts ...Option) Service
 
 type ServiceType string
+
+type ServiceStarter struct {
+	Global         *config.Config
+	Current        *ServiceConfig
+	CurrentDecoder *config.YamlNodeDecoder
+}
+
+type ServiceConfig struct {
+	Name     string   `yaml:"name"`
+	Protocol string   `yaml:"protocol"`
+	Port     uint16   `yaml:"port"`
+	Registry string   `yaml:"registry"`
+	Filters  []string `yaml:"filters"`
+}
 
 type Service interface {
 	Register(serviceDesc interface{}, serviceImpl interface{})
@@ -16,8 +32,12 @@ type Service interface {
 	Close(chan struct{}) error
 }
 
-type ServiceOptions interface {
-	ProtocolName() string
+type Options struct {
+	Registry registry.Registry
 
-	Apply(inters ...interface{})
+	Filters []filter.Filter
+
+	Customs []interface{}
 }
+
+type Option func(*Options)

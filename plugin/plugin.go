@@ -2,8 +2,10 @@ package plugin
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"time"
+
+	"github.com/zhengheng7913/grpc-go-starter/config"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -47,7 +49,7 @@ func (p *Info) Setup() error {
 		err error
 	)
 	go func() {
-		err = p.factory.Setup(p.name, &YamlNodeDecoder{Node: &p.cfg})
+		err = p.factory.Setup(p.name, &config.YamlNodeDecoder{Node: &p.cfg})
 		close(ch)
 	}()
 	select {
@@ -110,19 +112,6 @@ func (p *Info) flexDepends(setupStatus map[string]bool) (bool, error) {
 // Key 插件的唯一索引：type-name 。
 func (p *Info) Key() string {
 	return fmt.Sprintf("%s-%s", p.typ, p.name)
-}
-
-type YamlNodeDecoder struct {
-	Node *yaml.Node
-}
-
-func (d *YamlNodeDecoder) Decode(cfg interface{}) error {
-	{
-		if d.Node == nil {
-			return fmt.Errorf("yaml node empty")
-		}
-		return d.Node.Decode(cfg)
-	}
 }
 
 // Config 插件统一配置 plugin type => { plugin name => plugin config } 。

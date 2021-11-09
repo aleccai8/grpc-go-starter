@@ -1,7 +1,6 @@
 package server
 
 import (
-	"github.com/zhengheng7913/grpc-go-starter/config"
 	"github.com/zhengheng7913/grpc-go-starter/filter"
 	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
 	"google.golang.org/grpc"
@@ -30,12 +29,14 @@ func init() {
 	Register(ProtocolNameHTTP, NewHttpService)
 }
 
-func NewHttpService(cfg *config.ServiceConfig, opts ...Option) Service {
-	gOption := &Options{
-		ServiceOptions: &HttpOptions{},
-	}
+func NewHttpService(starter *ServiceStarter, opts ...Option) Service {
+	gOption := &Options{}
 	for _, f := range opts {
 		f(gOption)
+	}
+	cfg := &HttpServiceConfig{}
+	if err := starter.CurrentDecoder.Decode(cfg); err != nil {
+		panic(err)
 	}
 	return &HttpService{
 		opt: gOption,
@@ -47,17 +48,15 @@ func NewHttpServiceDesc(registrar HttpRegistrar) *ServiceDescHTTP {
 	return &ServiceDescHTTP{registrar: registrar}
 }
 
-func NewGrpcService(cfg *config.ServiceConfig, opts ...Option) Service {
+func NewGrpcService(starter *ServiceStarter, opts ...Option) Service {
 	// 初始化GrpcServer
-	gOption := &Options{
-		ServiceOptions: &GrpcOptions{},
-	}
+	gOption := &Options{}
 	for _, f := range opts {
 		f(gOption)
 	}
 	return &GrpcService{
 		opt: gOption,
-		cfg: cfg,
+		cfg: starter.Current,
 	}
 }
 
@@ -67,7 +66,7 @@ func WithServiceRegisterAdapter(srv Service) grpc.ServiceRegistrar {
 
 func WithGrpcOptions(serviceName string, option ...grpc.ServerOption) Option {
 	return func(opt *Options) {
-		opt.ServiceOptions.Apply(dessertGrpcOptions(option...))
+		opt.Customs = append(opt.Customs, dessertGrpcOptions(option...))
 	}
 }
 
@@ -79,7 +78,7 @@ func WithRegistry(r registry.Registry) Option {
 }
 
 func WithFilters(fs filter.Chain) Option {
-	return func(o *Options) {
-		o.ServiceOptions.Apply(fs...)
+	return func(opt *Options) {
+		opt.Filters = fs
 	}
 }
