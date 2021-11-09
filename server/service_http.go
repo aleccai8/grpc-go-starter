@@ -10,18 +10,26 @@ import (
 	"google.golang.org/grpc"
 )
 
-type HttpServiceConfig struct {
-	ServiceConfig
-	Target string `yaml:"target"`
+func NewHttpService(opts ...Option) Service {
+	gOption := &Options{}
+	for _, f := range opts {
+		f(gOption)
+	}
+	return &HttpService{
+		opts: gOption,
+	}
+}
+
+func NewHttpServiceDesc(registrar HttpRegistrar) *ServiceDescHTTP {
+	return &ServiceDescHTTP{registrar: registrar}
 }
 
 type HttpService struct {
 	desc     *ServiceDescHTTP
-	cfg      *HttpServiceConfig
 	server   *http.Server
 	serveMux *runtime.ServeMux
 	dialConn *grpc.ClientConn
-	opt      *Options
+	opts     *Options
 }
 
 func (s *HttpService) Register(serviceDesc interface{}, nil interface{}) {
@@ -31,8 +39,8 @@ func (s *HttpService) Register(serviceDesc interface{}, nil interface{}) {
 		return
 	}
 	s.desc = desc
-	filters, _ := assertHttpOptions(s.opt.Filters)
-	opts, _ := assertHttpOptions(s.opt.Customs)
+	filters := assertHttpOptions(s.opts.Filters)
+	opts := assertHttpOptions(s.opts.Others)
 	opts = append(opts, filters...)
 	s.serveMux = runtime.NewServeMux(opts...)
 }
@@ -40,7 +48,7 @@ func (s *HttpService) Register(serviceDesc interface{}, nil interface{}) {
 func (s *HttpService) Serve() error {
 	conn, err := grpc.DialContext(
 		context.Background(),
-		s.cfg.Target,
+		s.opts.Target,
 		grpc.WithBlock(),
 		grpc.WithInsecure(),
 	)
@@ -50,7 +58,7 @@ func (s *HttpService) Serve() error {
 	s.dialConn = conn
 	err = s.desc.registrar(context.Background(), s.serveMux, s.dialConn)
 	s.server = &http.Server{
-		Addr:    fmt.Sprintf(":%v", s.cfg.Port),
+		Addr:    fmt.Sprintf(":%v", s.opts.Port),
 		Handler: s.serveMux,
 	}
 	go func() {
@@ -59,7 +67,7 @@ func (s *HttpService) Serve() error {
 			return
 		}
 	}()
-	err = s.opt.Registry.Register(s.cfg.Name)
+	err = s.opts.Registry.Register(s.opts.ServiceName)
 	return nil
 }
 
@@ -73,22 +81,11 @@ type ServiceDescHTTP struct {
 	registrar HttpRegistrar
 }
 
-func assertHttpOptions(inters ...interface{}) ([]runtime.ServeMuxOption, bool) {
+func assertHttpOptions(inters []interface{}) []runtime.ServeMuxOption {
 	opts := make([]runtime.ServeMuxOption, 0)
 	for _, inter := range inters {
-		opt, ok := inter.(runtime.ServeMuxOption)
-		if !ok {
-			return nil, false
-		}
+		opt := inter.(runtime.ServeMuxOption)
 		opts = append(opts, opt)
 	}
-	return opts, true
-}
-
-func dessertHttpOptions(opts ...runtime.ServeMuxOption) []interface{} {
-	inters := make([]interface{}, len(opts))
-	for _, opt := range opts {
-		inters = append(inters, opt)
-	}
-	return inters
+	return opts
 }

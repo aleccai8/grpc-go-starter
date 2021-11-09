@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/zhengheng7913/grpc-go-starter/config"
 	"gopkg.in/yaml.v3"
 )
 
@@ -49,7 +48,7 @@ func (p *Info) Setup() error {
 		err error
 	)
 	go func() {
-		err = p.factory.Setup(p.name, &config.YamlNodeDecoder{Node: &p.cfg})
+		err = p.factory.Setup(p.name, &YamlNodeDecoder{Node: &p.cfg})
 		close(ch)
 	}()
 	select {
@@ -169,4 +168,17 @@ func (c Config) Setup() error {
 		close(done)
 	}
 	return nil
+}
+
+type YamlNodeDecoder struct {
+	Node *yaml.Node
+}
+
+func (d *YamlNodeDecoder) Decode(cfg interface{}) error {
+	{
+		if d.Node == nil {
+			return fmt.Errorf("yaml node empty")
+		}
+		return d.Node.Decode(cfg)
+	}
 }

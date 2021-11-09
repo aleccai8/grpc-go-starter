@@ -9,6 +9,17 @@ import (
 	"google.golang.org/grpc"
 )
 
+func NewGrpcService(opts ...Option) Service {
+	// 初始化GrpcServer
+	gOption := &Options{}
+	for _, f := range opts {
+		f(gOption)
+	}
+	return &GrpcService{
+		opts: gOption,
+	}
+}
+
 func newServiceRegisterAdapter(srv Service) grpc.ServiceRegistrar {
 	return &ServiceRegisterAdapter{
 		service: srv,
@@ -17,8 +28,7 @@ func newServiceRegisterAdapter(srv Service) grpc.ServiceRegistrar {
 
 type GrpcService struct {
 	server *grpc.Server
-	cfg    *ServiceConfig
-	opt    *Options
+	opts   *Options
 }
 
 func (g *GrpcService) Register(serviceDesc interface{}, serviceImpl interface{}) {
@@ -27,15 +37,15 @@ func (g *GrpcService) Register(serviceDesc interface{}, serviceImpl interface{})
 		fmt.Println(errors.New("service desc type invalid"))
 		return
 	}
-	filters, _ := assertGrpcOptions(g.opt.Filters)
-	opts, _ := assertGrpcOptions(g.opt.Customs)
+	filters, _ := assertGrpcOptions(g.opts.Filters)
+	opts, _ := assertGrpcOptions(g.opts.Others)
 	opts = append(opts, filters...)
 	g.server = grpc.NewServer(opts...)
 	g.server.RegisterService(desc, serviceImpl)
 }
 
 func (g *GrpcService) Serve() error {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", g.cfg.Port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", g.opts.Port))
 	if err != nil {
 		return fmt.Errorf("Failed to listen: %v ", err)
 	}
@@ -46,7 +56,7 @@ func (g *GrpcService) Serve() error {
 		}
 	}()
 
-	err = g.opt.Registry.Register(g.cfg.Name)
+	err = g.opts.Registry.Register(g.opts.ServiceName)
 	if err != nil {
 		return err
 	}

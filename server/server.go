@@ -10,6 +10,29 @@ import (
 
 const MaxCloseWaitTime = 10 * time.Second
 
+var (
+	implementMap = make(map[string]ServiceConstructor)
+)
+
+const (
+	ProtocolNameGrpc = "grpc"
+	ProtocolNameHTTP = "http"
+)
+
+// Register 非线程安全
+func Register(name string, constructor ServiceConstructor) {
+	implementMap[name] = constructor
+}
+
+func Get(name string) ServiceConstructor {
+	return implementMap[name]
+}
+
+func init() {
+	Register(ProtocolNameGrpc, NewGrpcService)
+	Register(ProtocolNameHTTP, NewHttpService)
+}
+
 func NewServer() *Server {
 	return &Server{
 		services: make(map[string]Service),

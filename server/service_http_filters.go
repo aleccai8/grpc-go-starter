@@ -23,7 +23,6 @@ func init() {
 }
 
 func httpErrorHandler(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error) {
-
 	var customStatus *runtime.HTTPStatusError
 	if errors.As(err, &customStatus) {
 		err = customStatus.Err

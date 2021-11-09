@@ -1,8 +1,7 @@
-package config
+package grpc_go_starter
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"sync/atomic"
@@ -74,15 +73,24 @@ type Config struct {
 		LocalIP       string `yaml:"local_ip"`
 	}
 	Server struct {
-		Name     string      `yaml:"name"`
-		Protocol string      `yaml:"protocol"`
-		Port     uint16      `yaml:"port"`
-		Registry string      `yaml:"registry"`
-		Filters  []string    `yaml:"filters"`
-		Services []yaml.Node `yaml:"services"`
+		Name     string           `yaml:"name"`
+		Protocol string           `yaml:"protocol"`
+		Port     uint16           `yaml:"port"`
+		Registry string           `yaml:"registry"`
+		Filters  []string         `yaml:"filters"`
+		Services []*ServiceConfig `yaml:"services"`
 	}
 	Client  ClientConfig
 	Plugins plugin.Config
+}
+
+type ServiceConfig struct {
+	Name     string   `yaml:"name"`
+	Protocol string   `yaml:"protocol"`
+	Port     uint16   `yaml:"port"`
+	Target   string   `yaml:"target"`
+	Registry string   `yaml:"registry"`
+	Filters  []string `yaml:"filters"`
 }
 
 type ClientConfig struct {
@@ -165,17 +173,4 @@ func defaultConfig() *Config {
 	cfg := &Config{}
 
 	return cfg
-}
-
-type YamlNodeDecoder struct {
-	Node *yaml.Node
-}
-
-func (d *YamlNodeDecoder) Decode(cfg interface{}) error {
-	{
-		if d.Node == nil {
-			return fmt.Errorf("yaml node empty")
-		}
-		return d.Node.Decode(cfg)
-	}
 }

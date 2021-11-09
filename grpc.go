@@ -3,7 +3,6 @@ package grpc_go_starter
 import (
 	"fmt"
 
-	"github.com/zhengheng7913/grpc-go-starter/config"
 	"github.com/zhengheng7913/grpc-go-starter/filter"
 	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
 	"github.com/zhengheng7913/grpc-go-starter/server"
@@ -13,17 +12,17 @@ import (
 // NewServer 启动时序 初始化server->config->plugin->service
 func NewServer(opts ...server.Option) *server.Server {
 
-	path := config.ServerConfigPath()
+	path := ServerConfigPath()
 
-	cfg, err := config.LoadConfig(path)
+	cfg, err := LoadConfig(path)
 
 	if err != nil {
 		panic("parse config failed: " + err.Error())
 	}
 
-	config.SetGlobalConfig(cfg)
+	SetGlobalConfig(cfg)
 
-	if err := config.Setup(cfg); err != nil {
+	if err := Setup(cfg); err != nil {
 		panic("setup plugin fail: " + err.Error())
 	}
 
@@ -31,21 +30,18 @@ func NewServer(opts ...server.Option) *server.Server {
 }
 
 //
-func newServiceWithConfig(starter *server.ServiceStarter, opts ...server.Option) server.Service {
+func newServiceWithConfig(cfg *Config, conf *ServiceConfig, opt ...server.Option) server.Service {
 
 	var (
 		filters []filter.Filter
 	)
 
-	global := starter.Global
-	current := starter.Current
-
 	// 填充全局Port默认值
-	if global.Server.Port > 0 && current.Port == 0 {
-		current.Port = global.Server.Port
+	if cfg.Server.Port > 0 && conf.Port == 0 {
+		conf.Port = cfg.Server.Port
 	}
 
-	for _, name := range Deduplicate(global.Server.Filters, current.Filters) { // 全局filter在前，且去重
+	for _, name := range Deduplicate(cfg.Server.Filters, conf.Filters) { // 全局filter在前，且去重
 		f := filter.GetServer(name)
 		if f == nil {
 			panic(fmt.Sprintf("filter %s no registered, do not configure", name))
@@ -53,39 +49,34 @@ func newServiceWithConfig(starter *server.ServiceStarter, opts ...server.Option)
 		filters = append(filters, f)
 	}
 
-	reg := registry.Get(current.Name)
-	if current.Registry != "" && reg == nil {
-		fmt.Printf("service:%s registry not exist\n", current.Name)
+	reg := registry.Get(conf.Name)
+	if conf.Registry != "" && reg == nil {
+		fmt.Printf("service:%s registry not exist\n", conf.Name)
+	}
+	opts := []server.Option{
+		server.WithServiceName(conf.Name),
+		server.WithPort(conf.Port),
+		server.WithTarget(conf.Target),
+		server.WithFilters(filters),
+		server.WithRegistry(reg),
 	}
 
-	opts = append(opts,
-		server.WithRegistry(reg),
-		server.WithFilters(filters),
-	)
-
-	sc := server.Get(current.Protocol)
+	sc := server.Get(conf.Protocol)
 
 	if sc == nil {
-		panic("can not get service constructor:" + current.Name)
+		panic("can not get service constructor:" + conf.Name)
 	}
 
-	return sc(starter, opts...)
+	opts = append(opts, opt...)
+
+	return sc(opts...)
 }
 
-func NewServerWithConfig(cfg *config.Config, opts ...server.Option) *server.Server {
+func NewServerWithConfig(cfg *Config, opts ...server.Option) *server.Server {
 	s := server.NewServer()
 
-	for _, node := range cfg.Server.Services {
-		decoder := &config.YamlNodeDecoder{Node: &node}
-		starter := &server.ServiceStarter{
-			Global:         cfg,
-			Current:        nil,
-			CurrentDecoder: decoder,
-		}
-		if err := decoder.Decode(starter.Current); err != nil {
-			panic("decode service config failed: " + err.Error())
-		}
-		s.AddService(starter.Current.Name, newServiceWithConfig(starter, opts...))
+	for _, conf := range cfg.Server.Services {
+		s.AddService(conf.Name, newServiceWithConfig(cfg, conf, opts...))
 	}
 	return s
 }

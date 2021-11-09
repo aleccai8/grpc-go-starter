@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 
 	"github.com/zhengheng7913/grpc-go-starter/examples/simple-server/proto"
 )
@@ -19,5 +20,5 @@ func (e EchoServiceImpl) Echo(ctx context.Context, request *proto.EchoRequest) (
 
 	return &proto.EchoReply{
 		Message: "hello world",
-	}, nil
+	}, errors.New("333")
 }
