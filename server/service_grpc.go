@@ -3,7 +3,8 @@ package server
 import (
 	"errors"
 	"fmt"
-	"log"
+	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
+	"google.golang.org/grpc/grpclog"
 	"net"
 
 	"google.golang.org/grpc"
@@ -45,25 +46,28 @@ func (g *GrpcService) Register(serviceDesc interface{}, serviceImpl interface{})
 }
 
 func (g *GrpcService) Serve() error {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", g.opts.Port))
+	// TODO: 添加ipport支持
+	lis, err := net.Listen("tcp", fmt.Sprintf("%v", g.opts.Address))
 	if err != nil {
 		return fmt.Errorf("Failed to listen: %v ", err)
 	}
 	go func() {
+		defer g.opts.Registry.Deregister(g.opts.ServiceName)
+		err = g.opts.Registry.Register(g.opts.ServiceName, registry.WithAddress(g.opts.Address))
+		if err != nil {
+			grpclog.Errorln(err)
+		}
 		err := g.server.Serve(lis)
 		if err != nil {
-			log.Fatalln(err)
+			grpclog.Fatalln(err)
 		}
 	}()
 
-	err = g.opts.Registry.Register(g.opts.ServiceName)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (g *GrpcService) Close(c chan struct{}) error {
+	g.opts.Registry.Deregister(g.opts.ServiceName)
 	g.server.Stop()
 	return nil
 }

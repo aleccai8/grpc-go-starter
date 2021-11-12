@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
+	"google.golang.org/grpc/grpclog"
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -57,17 +59,26 @@ func (s *HttpService) Serve() error {
 	}
 	s.dialConn = conn
 	err = s.desc.registrar(context.Background(), s.serveMux, s.dialConn)
+	if err != nil {
+		return err
+	}
 	s.server = &http.Server{
-		Addr:    fmt.Sprintf(":%v", s.opts.Port),
+		// TODO: 添加ipport支持
+		Addr:    fmt.Sprintf("%v", s.opts.Address),
 		Handler: s.serveMux,
 	}
 	go func() {
+		defer s.opts.Registry.Deregister(s.opts.ServiceName)
+		err = s.opts.Registry.Register(s.opts.ServiceName, registry.WithAddress(s.opts.Address))
+		if err != nil {
+			grpclog.Errorln(err)
+		}
 		err := s.server.ListenAndServe()
 		if err != nil {
-			return
+			grpclog.Fatalln(err)
 		}
 	}()
-	err = s.opts.Registry.Register(s.opts.ServiceName)
+
 	return nil
 }
 

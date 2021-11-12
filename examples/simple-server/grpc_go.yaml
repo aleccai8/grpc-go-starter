@@ -33,6 +33,7 @@ plugins:
     polaris:
       heartbeat_interval: 3000
       address_list: 152.136.190.108:31917
+      register_self: true
       service:
         - name: grpc.one.user_server.UserServiceHTTP
           namespace: test

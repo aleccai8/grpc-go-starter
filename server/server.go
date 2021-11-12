@@ -73,7 +73,6 @@ func (s *Server) Serve() error {
 		}(name, service)
 	}
 	_ = <-ch
-
 	ctx, cancel := context.WithTimeout(context.Background(), MaxCloseWaitTime)
 	defer cancel()
 	var wg sync.WaitGroup

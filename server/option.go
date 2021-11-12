@@ -11,7 +11,11 @@ type Options struct {
 
 	ServiceName string
 
+	IP string
+
 	Port uint16
+
+	Address string
 
 	// GrpcGateway 代理的目标地址
 	Target string
@@ -69,5 +73,17 @@ func WithRegistry(r registry.Registry) Option {
 func WithFilters(fs filter.Chain) Option {
 	return func(opt *Options) {
 		opt.Filters = append(opt.Filters, fs...)
+	}
+}
+
+func WithIP(ip string) Option {
+	return func(options *Options) {
+		options.IP = ip
+	}
+}
+
+func WithAddress(address string) Option {
+	return func(options *Options) {
+		options.Address = address
 	}
 }

@@ -88,6 +88,7 @@ type ServiceConfig struct {
 	Name     string   `yaml:"name"`
 	Protocol string   `yaml:"protocol"`
 	Port     uint16   `yaml:"port"`
+	Address  string   `yaml:"address"`
 	Target   string   `yaml:"target"`
 	Registry string   `yaml:"registry"`
 	Filters  []string `yaml:"filters"`

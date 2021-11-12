@@ -59,6 +59,7 @@ func newServiceWithConfig(cfg *Config, conf *ServiceConfig, opt ...server.Option
 		server.WithTarget(conf.Target),
 		server.WithFilters(filters),
 		server.WithRegistry(reg),
+		server.WithAddress(conf.Address),
 	}
 
 	sc := server.Get(conf.Protocol)
