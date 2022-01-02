@@ -2,11 +2,19 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"reflect"
 	"sync"
 
 	"github.com/spf13/cast"
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	ErrInvalidUnmarshalType = errors.New("invalid unmarshal type")
+
+	ErrInvalid
 )
 
 func NewKVCodec() Codec {
@@ -22,6 +30,11 @@ func (k *KVCodec) Name() string {
 
 func (k *KVCodec) Unmarshal(input []byte, output interface{}) error {
 	*(output.(*string)) = string(input)
+	rv := reflect.ValueOf(output)
+	if rv.Kind() != reflect.Ptr || rv.IsNil() {
+		return ErrInvalidUnmarshalType
+	}
+	rv.Elem().Set(reflect.ValueOf(string(input)))
 	return nil
 }
 
