@@ -9,6 +9,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func NewKVCodec() Codec {
+	return &KVCodec{}
+}
+
 type KVCodec struct {
 }
 
@@ -44,7 +48,9 @@ func (y *YAMLCodec) Unmarshal(input []byte, output interface{}) error {
 }
 
 func NewDefaultLoader() ConfigLoader {
-	return &DefaultLoader{}
+	return &DefaultLoader{
+		configMap: make(map[string]Config),
+	}
 }
 
 type DefaultLoader struct {
