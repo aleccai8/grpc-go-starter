@@ -27,7 +27,6 @@ func (k *KVCodec) Name() string {
 }
 
 func (k *KVCodec) Unmarshal(input []byte, output interface{}) error {
-	*(output.(*string)) = string(input)
 	rv := reflect.ValueOf(output)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
 		return ErrInvalidUnmarshalType
