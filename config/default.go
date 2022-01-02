@@ -13,8 +13,6 @@ import (
 
 var (
 	ErrInvalidUnmarshalType = errors.New("invalid unmarshal type")
-
-	ErrInvalid
 )
 
 func NewKVCodec() Codec {
@@ -34,7 +32,7 @@ func (k *KVCodec) Unmarshal(input []byte, output interface{}) error {
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
 		return ErrInvalidUnmarshalType
 	}
-	rv.Elem().Set(reflect.ValueOf(string(input).(interface{})))
+	rv.Elem().Set(reflect.ValueOf(string(input)))
 	return nil
 }
 
