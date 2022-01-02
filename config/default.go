@@ -34,7 +34,7 @@ func (k *KVCodec) Unmarshal(input []byte, output interface{}) error {
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
 		return ErrInvalidUnmarshalType
 	}
-	rv.Elem().Set(reflect.ValueOf(string(input)))
+	rv.Elem().Set(reflect.ValueOf(string(input).(interface{})))
 	return nil
 }
 
