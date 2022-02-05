@@ -1,14 +1,5 @@
 package registry
 
-import (
-	"sync"
-)
-
-var (
-	registries = make(map[string]Registry)
-	lock       = sync.RWMutex{}
-)
-
 func Register(name string, s Registry) {
 	lock.Lock()
 	defer lock.Unlock()
@@ -16,8 +7,8 @@ func Register(name string, s Registry) {
 }
 
 func Get(name string) Registry {
-	lock.Lock()
-	defer lock.Unlock()
+	lock.RLock()
+	defer lock.RUnlock()
 	return registries[name]
 }
 

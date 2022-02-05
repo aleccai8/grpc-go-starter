@@ -2,7 +2,6 @@ package grpc_go_starter
 
 import (
 	"fmt"
-
 	"github.com/zhengheng7913/grpc-go-starter/filter"
 	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
 	"github.com/zhengheng7913/grpc-go-starter/server"
