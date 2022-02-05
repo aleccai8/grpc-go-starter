@@ -17,6 +17,10 @@ var (
 	ErrDiscoveryNotFound = fmt.Errorf("discovery not found")
 )
 
+const (
+	PluginType = "discovery"
+)
+
 type Options struct {
 	Context   context.Context
 	Namespace string
