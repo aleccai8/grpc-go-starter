@@ -14,9 +14,9 @@ func NewClients(opt ...client.Option) *client.Clients {
 }
 
 func newClientWithConfig(cfg *Config, conf *ServiceConfig, opt ...client.Option) *client.Clients {
-
+	return nil
 }
 
 func NewClientWithConfig(cfg *Config, opts ...client.Option) *client.Clients {
-
+	return nil
 }
