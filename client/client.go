@@ -43,14 +43,14 @@ type Client interface {
 	Register(realClient interface{}, opts ...Option)
 }
 
-type Manager struct {
+type Clients struct {
 	clients map[string]Client
 }
 
-func (m *Manager) AddClient(name string, client Client) {
+func (m *Clients) AddClient(name string, client Client) {
 	m.clients[name] = client
 }
 
-func (m *Manager) Client(name string) Client {
+func (m *Clients) Client(name string) Client {
 	return m.clients[name]
 }

@@ -51,6 +51,7 @@ func (g *GrpcClient) Register(realClient interface{}, opts ...Option) {
 		panic(err)
 	}
 	g.realClient = cons(conn)
+
 }
 
 func (g *GrpcClient) isGrpcMethod(t reflect.Type) bool {

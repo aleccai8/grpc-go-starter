@@ -46,7 +46,6 @@ func (g *GrpcService) Register(serviceDesc interface{}, serviceImpl interface{})
 }
 
 func (g *GrpcService) Serve() error {
-	// TODO: 添加ipport支持
 	lis, err := net.Listen("tcp", fmt.Sprintf("%v", g.opts.Address))
 	if err != nil {
 		return fmt.Errorf("Failed to listen: %v ", err)

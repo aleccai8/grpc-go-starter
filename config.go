@@ -10,21 +10,41 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// 架启动后解析yaml文件并赋值
+var gm = atomic.Value{}
+
 // SetGlobalConfig 设置全局配置对象
 func SetGlobalConfig(cfg *Config) {
 	gm.Store(cfg)
 }
 
-// ServerConfigPath 获取服务启动配置文件路径
+// ConfigPath 获取服务启动配置文件路径
 //	最高优先级：服务主动修改ServerConfigPath变量
 //	第二优先级：服务通过--conf或者-conf传入配置文件路径
 //	第三优先级：默认路径./grpc_go.yaml
-func ServerConfigPath() string {
+func ConfigPath() string {
 	if Path == defaultConfigPath {
 		flag.StringVar(&Path, "conf", defaultConfigPath, "server config path")
 		flag.Parse()
 	}
 	return Path
+}
+
+func LoadSetup() (*Config, error) {
+	cfg := gm.Load().(*Config)
+	if cfg != nil {
+		return cfg, nil
+	}
+	path := ConfigPath()
+	cfg, err := LoadConfig(path)
+	if err != nil {
+		return nil, err
+	}
+	err = Setup(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func LoadConfig(path string) (*Config, error) {
@@ -38,6 +58,7 @@ func LoadConfig(path string) (*Config, error) {
 	if err := repairClientConfig(cfg); err != nil {
 		return nil, err
 	}
+	SetGlobalConfig(cfg)
 	return cfg, nil
 }
 
@@ -58,13 +79,6 @@ const defaultConfigPath = "./grpc_go.yaml"
 
 var Path = defaultConfigPath
 
-// 架启动后解析yaml文件并赋值
-var gm = atomic.Value{}
-
-func init() {
-	gm.Store(defaultConfig())
-}
-
 type Config struct {
 	Global struct {
 		Namespace     string `yaml:"namespace"`
@@ -80,7 +94,11 @@ type Config struct {
 		Filters  []string         `yaml:"filters"`
 		Services []*ServiceConfig `yaml:"services"`
 	}
-	Client  ClientConfig
+	Client struct {
+		Discovery string          `yaml:"discovery"`
+		Filters   []string        `yaml:"filters"`
+		Clients   []*ClientConfig `yaml:"clients"`
+	}
 	Plugins plugin.Config
 }
 
@@ -95,6 +113,12 @@ type ServiceConfig struct {
 }
 
 type ClientConfig struct {
+	Name      string   `yaml:"name"`
+	Protocol  string   `yaml:"protocol"`
+	Port      uint16   `yaml:"port"`
+	Address   string   `yaml:"address"`
+	Discovery string   `yaml:"discovery"`
+	Filters   []string `yaml:"filters"`
 }
 
 // getShellName 获取占位符的key，即${var}里面的var内容
@@ -169,7 +193,6 @@ func expandEnv(s string) string {
 	return string(buf) + s[i:]
 }
 
-// 给config设置默认值
 func defaultConfig() *Config {
 	cfg := &Config{}
 
