@@ -42,11 +42,11 @@ func (g *GrpcClient) Register(realClient interface{}, opts ...Option) {
 	if !ok {
 		panic(ErrNotGrpcClient)
 	}
-	conn, err := d.DialContext(
-		ctx,
-		fmt.Sprintf("%v://%v", g.options.Discovery, g.options.Name),
-		discovery.WithNamespace(g.options.Namespace),
-	)
+	target, err := d.Target(fmt.Sprintf("%v://%v", g.options.Discovery, g.options.Name))
+	if err != nil {
+		panic(fmt.Errorf("get target error: %v", err))
+	}
+	conn, err := grpc.DialContext(ctx, target)
 	if err != nil {
 		panic(err)
 	}
