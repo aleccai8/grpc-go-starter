@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
-	"google.golang.org/grpc"
 	"sync"
 )
 
@@ -31,5 +30,5 @@ type Option func(opt *Options)
 type Discovery interface {
 	List(name string, opts ...Option) ([]*registry.Node, error)
 
-	DialContext(ctx context.Context, target string, opts ...Option) (*grpc.ClientConn, error)
+	Target(target string, opts ...Option) (string, error)
 }

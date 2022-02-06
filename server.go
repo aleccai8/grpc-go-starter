@@ -10,27 +10,15 @@ import (
 
 // NewServer 启动时序 初始化server->config->plugin->service
 func NewServer(opts ...server.Option) *server.Server {
-
-	path := ServerConfigPath()
-
-	cfg, err := LoadConfig(path)
-
+	cfg, err := LoadSetup()
 	if err != nil {
-		panic("parse config failed: " + err.Error())
+		panic(fmt.Errorf("load setup error: %s", err))
 	}
-
-	SetGlobalConfig(cfg)
-
-	if err := Setup(cfg); err != nil {
-		panic("setup plugin fail: " + err.Error())
-	}
-
 	return NewServerWithConfig(cfg, opts...)
 }
 
 //
 func newServiceWithConfig(cfg *Config, conf *ServiceConfig, opt ...server.Option) server.Service {
-
 	var (
 		filters []filter.Filter
 	)
