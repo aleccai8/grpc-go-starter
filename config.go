@@ -7,7 +7,6 @@ import (
 	"sync/atomic"
 
 	"github.com/zhengheng7913/grpc-go-starter/plugin"
-	"gopkg.in/yaml.v3"
 )
 
 // 架启动后解析yaml文件并赋值
@@ -31,8 +30,8 @@ func ConfigPath() string {
 }
 
 func LoadSetup() (*Config, error) {
-	cfg := gm.Load().(*Config)
-	if cfg != nil {
+	cfg, ok := gm.Load().(*Config)
+	if ok {
 		return cfg, nil
 	}
 	path := ConfigPath()
