@@ -36,10 +36,10 @@ func newServiceWithConfig(cfg *Config, conf *ServiceConfig, opt ...server.Option
 		reg = registry.Get(conf.Registry)
 	}
 	if conf.Registry != "" && reg == nil {
-		fmt.Printf("service:%s registry not exist\n", conf.Name)
+		fmt.Printf("service:%s registry not exist\n", conf.ServiceName)
 	}
 	opts := []server.Option{
-		server.WithServiceName(conf.Name),
+		server.WithServiceName(conf.ServiceName),
 		server.WithPort(conf.Port),
 		server.WithTarget(conf.Target),
 		server.WithFilters(filters),
@@ -50,7 +50,7 @@ func newServiceWithConfig(cfg *Config, conf *ServiceConfig, opt ...server.Option
 	sc := server.Get(conf.Protocol)
 
 	if sc == nil {
-		panic("can not get service constructor:" + conf.Name)
+		panic("can not get service constructor:" + conf.ServiceName)
 	}
 
 	opts = append(opts, opt...)

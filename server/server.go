@@ -43,12 +43,12 @@ type Server struct {
 	services map[string]Service
 }
 
-func (s *Server) AddService(serviceName string, service Service) {
-	s.services[serviceName] = service
+func (s *Server) AddService(name string, service Service) {
+	s.services[name] = service
 }
 
-func (s *Server) Service(serviceName string) Service {
-	return s.services[serviceName]
+func (s *Server) Service(name string) Service {
+	return s.services[name]
 }
 
 func (s *Server) Register(desc interface{}, serviceImpl interface{}) {

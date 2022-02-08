@@ -19,9 +19,9 @@ func Get(name string) func(opt ...Option) Client {
 	return implementMap[name]
 }
 
-func WithClientName(name string) Option {
+func WithServiceName(name string) Option {
 	return func(opt *Options) {
-		opt.ClientName = name
+		opt.ServiceName = name
 	}
 }
 
@@ -44,10 +44,10 @@ func WithFilter(filters []filter.Filter) Option {
 }
 
 type Options struct {
-	Discovery  discovery.Discovery
-	ClientName string
-	Namespace  string
-	Filters    []filter.Filter
+	Discovery   discovery.Discovery
+	ServiceName string
+	Namespace   string
+	Filters     []filter.Filter
 }
 
 type Option func(opt *Options)

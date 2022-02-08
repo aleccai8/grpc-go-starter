@@ -31,10 +31,10 @@ func newClientWithConfig(cfg *Config, conf *ClientConfig, opt ...client.Option) 
 		dis = discovery.Get(conf.Discovery)
 	}
 	if conf.Discovery != "" && dis == nil {
-		fmt.Printf("service:%s discovery not exist\n", conf.Name)
+		fmt.Printf("service:%s discovery not exist\n", conf.ServiceName)
 	}
 	opts := []client.Option{
-		client.WithClientName(conf.Name),
+		client.WithServiceName(conf.ServiceName),
 		//client.WithFilters(filters),
 		client.WithDiscovery(dis),
 	}
@@ -43,7 +43,7 @@ func newClientWithConfig(cfg *Config, conf *ClientConfig, opt ...client.Option) 
 
 	cc := client.Get(conf.Protocol)
 	if cc == nil {
-		panic(fmt.Errorf("can not get client constructor: %s ", conf.Name))
+		panic(fmt.Errorf("can not get client constructor: %s ", conf.ServiceName))
 	}
 
 	return cc(opts...)
