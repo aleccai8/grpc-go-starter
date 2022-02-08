@@ -40,7 +40,7 @@ func (g *GrpcClient) Register(realClient interface{}, opts ...Option) {
 	if !ok {
 		panic(ErrNotGrpcClient)
 	}
-	target, err := g.options.Discovery.Target(fmt.Sprintf("%v://%v", g.options.Discovery, g.options.ClientName))
+	target, err := g.options.Discovery.Target(fmt.Sprintf("%v://%v", g.options.Discovery, g.options.ServiceName))
 	if err != nil {
 		panic(fmt.Errorf("get target error: %v", err))
 	}
