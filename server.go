@@ -23,11 +23,6 @@ func newServiceWithConfig(cfg *Config, conf *ServiceConfig, opt ...server.Option
 		filters []filter.Filter
 	)
 
-	// 填充全局Port默认值
-	if cfg.Server.Port > 0 && conf.Port == 0 {
-		conf.Port = cfg.Server.Port
-	}
-
 	for _, name := range Deduplicate(cfg.Server.Filters, conf.Filters) { // 全局filter在前，且去重
 		f := filter.GetServer(name)
 		if f == nil {
@@ -35,8 +30,11 @@ func newServiceWithConfig(cfg *Config, conf *ServiceConfig, opt ...server.Option
 		}
 		filters = append(filters, f)
 	}
+	var reg registry.Registry = nil
 
-	reg := registry.Get(conf.Name)
+	if conf.Registry != "" {
+		reg = registry.Get(conf.Registry)
+	}
 	if conf.Registry != "" && reg == nil {
 		fmt.Printf("service:%s registry not exist\n", conf.Name)
 	}

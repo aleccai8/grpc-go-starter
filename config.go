@@ -87,17 +87,12 @@ type Config struct {
 		LocalIP       string `yaml:"local_ip"`
 	}
 	Server struct {
-		Name     string           `yaml:"name"`
-		Protocol string           `yaml:"protocol"`
-		Port     uint16           `yaml:"port"`
-		Registry string           `yaml:"registry"`
 		Filters  []string         `yaml:"filters"`
 		Services []*ServiceConfig `yaml:"services"`
 	}
 	Client struct {
-		Discovery string          `yaml:"discovery"`
-		Filters   []string        `yaml:"filters"`
-		Clients   []*ClientConfig `yaml:"clients"`
+		Filters []string        `yaml:"filters"`
+		Clients []*ClientConfig `yaml:"clients"`
 	}
 	Plugins plugin.Config
 }

@@ -11,7 +11,7 @@ func NewHttpClient() Client {
 type HttpClient struct {
 }
 
-func (h *HttpClient) Invoke(context context.Context, method string, req interface{}, opts ...Option) (interface{}, error) {
+func (h *HttpClient) Invoke(context context.Context, method string, req interface{}) (interface{}, error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -1,25 +1,27 @@
 package client
 
-import "context"
+import (
+	"context"
+	"github.com/zhengheng7913/grpc-go-starter/filter"
+	"github.com/zhengheng7913/grpc-go-starter/naming/discovery"
+)
 
 var (
-	constructors = make(map[string]func() Client)
+	implementMap = make(map[string]func(opt ...Option) Client)
 )
 
 func init() {
-	constructors[GrpcProtocol] = NewGrpcClient
-	constructors[HttpProtocol] = NewHttpClient
+	implementMap[GrpcProtocol] = NewGrpcClient
+	//implementMap[HttpProtocol] = NewHttpClient
 }
 
-func WithDiscovery(name string) Option {
-	return func(opt *Options) {
-		opt.Discovery = name
-	}
+func Get(name string) func(opt ...Option) Client {
+	return implementMap[name]
 }
 
-func WithName(name string) Option {
+func WithClientName(name string) Option {
 	return func(opt *Options) {
-		opt.Name = name
+		opt.ClientName = name
 	}
 }
 
@@ -29,10 +31,23 @@ func WithNamespace(namespace string) Option {
 	}
 }
 
+func WithDiscovery(d discovery.Discovery) Option {
+	return func(opt *Options) {
+		opt.Discovery = d
+	}
+}
+
+func WithFilter(filters []filter.Filter) Option {
+	return func(opt *Options) {
+		opt.Filters = filters
+	}
+}
+
 type Options struct {
-	Discovery string
-	Name      string
-	Namespace string
+	Discovery  discovery.Discovery
+	ClientName string
+	Namespace  string
+	Filters    []filter.Filter
 }
 
 type Option func(opt *Options)
@@ -41,6 +56,12 @@ type Client interface {
 	Invoke(context context.Context, method string, req interface{}, opts ...Option) (interface{}, error)
 
 	Register(realClient interface{}, opts ...Option)
+}
+
+func NewClients() *Clients {
+	return &Clients{
+		clients: make(map[string]Client),
+	}
 }
 
 type Clients struct {

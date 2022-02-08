@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"fmt"
-	"github.com/zhengheng7913/grpc-go-starter/naming/discovery"
 	"google.golang.org/grpc"
 	"reflect"
 )
@@ -15,9 +14,13 @@ var (
 	ErrNotGrpcClient = fmt.Errorf("not a valid grpc client")
 )
 
-func NewGrpcClient() Client {
+func NewGrpcClient(opts ...Option) Client {
+	options := &Options{}
+	for _, opt := range opts {
+		opt(options)
+	}
 	return &GrpcClient{
-		options:    nil,
+		options:    options,
 		realClient: nil,
 	}
 }
@@ -28,13 +31,8 @@ type GrpcClient struct {
 }
 
 func (g *GrpcClient) Register(realClient interface{}, opts ...Option) {
-	g.options = &Options{}
 	for _, opt := range opts {
 		opt(g.options)
-	}
-	d := discovery.Get(g.options.Discovery)
-	if d == nil {
-		panic(discovery.ErrDiscoveryNotFound)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -42,7 +40,7 @@ func (g *GrpcClient) Register(realClient interface{}, opts ...Option) {
 	if !ok {
 		panic(ErrNotGrpcClient)
 	}
-	target, err := d.Target(fmt.Sprintf("%v://%v", g.options.Discovery, g.options.Name))
+	target, err := g.options.Discovery.Target(fmt.Sprintf("%v://%v", g.options.Discovery, g.options.ClientName))
 	if err != nil {
 		panic(fmt.Errorf("get target error: %v", err))
 	}
