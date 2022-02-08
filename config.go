@@ -2,6 +2,7 @@ package grpc_go_starter
 
 import (
 	"flag"
+	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
 	"sync/atomic"
