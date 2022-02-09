@@ -2,12 +2,17 @@ package client
 
 import (
 	"context"
+	"errors"
 	"github.com/zhengheng7913/grpc-go-starter/filter"
 	"github.com/zhengheng7913/grpc-go-starter/naming/discovery"
 )
 
 var (
-	implementMap = make(map[string]func[T](opt ...Option) Client[T])
+	implementMap = make(map[string]func(opts ...Option) Client)
+)
+
+var (
+	ErrClientInvalid = errors.New("err client invalid")
 )
 
 func init() {
@@ -17,6 +22,31 @@ func init() {
 
 func Get(name string) func(opt ...Option) Client {
 	return implementMap[name]
+}
+
+func Invoke[T1 any, T2 any](client Client, context context.Context, method any, req T1, opts ...Option) (reply T2, err error) {
+	options := applyOption(opts...)
+	if client == nil {
+		return reply, ErrClientInvalid
+	}
+	r, err := client.Invoke(context, method, req, options)
+	reply = r.(T2)
+	return reply, err
+}
+
+func Register[T any](client Client, realClient T, opts ...Option) {
+	options := applyOption(opts...)
+	if client == nil {
+		panic(ErrClientInvalid)
+	}
+	client.Register(realClient, options)
+}
+
+func RealClient[T any](client Client) T {
+	if client == nil {
+		panic(ErrClientInvalid)
+	}
+	return client.RealClient().(T)
 }
 
 func WithServiceName(name string) Option {
@@ -52,12 +82,12 @@ type Options struct {
 
 type Option func(opt *Options)
 
-type Client[T interface{}] interface {
-	Invoke(context context.Context, method string, req interface{}, opts ...Option) (interface{}, error)
+type Client interface {
+	Invoke(context context.Context, method any, req any, options *Options) (any, error)
 
-	RealClient() T
+	RealClient() any
 
-	Register(realClient interface{}, opts ...Option)
+	Register(realClient any, options *Options)
 }
 
 func NewClients() *Clients {

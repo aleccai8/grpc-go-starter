@@ -14,33 +14,31 @@ var (
 	ErrNotGrpcClient = fmt.Errorf("not a valid grpc client")
 )
 
-func NewGrpcClient[T](opts ...Option) Client[T] {
+func NewGrpcClient(opts ...Option) Client {
 	options := &Options{}
 	for _, opt := range opts {
 		opt(options)
 	}
-	return &GrpcClient[]{
+	return &GrpcClient{
 		options:    options,
 		realClient: nil,
 	}
 }
 
-type GrpcClient[T interface{}] struct {
+type GrpcClient struct {
 	options    *Options
-	realClient T
+	realClient any
 }
 
-func (g *GrpcClient[T]) RealClient() T {
-	return nil
+func (g *GrpcClient) RealClient() any {
+	return g.realClient
 }
 
-func (g *GrpcClient[T]) Register(realClient interface{}, opts ...Option) {
-	for _, opt := range opts {
-		opt(g.options)
-	}
+func (g *GrpcClient) Register(realClient interface{}, options *Options) {
+	g.options = options
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	cons, ok := realClient.(func(cc grpc.ClientConnInterface) interface{})
+	cons, ok := realClient.(func(cc grpc.ClientConnInterface) any)
 	if !ok {
 		panic(ErrNotGrpcClient)
 	}
@@ -55,13 +53,20 @@ func (g *GrpcClient[T]) Register(realClient interface{}, opts ...Option) {
 	g.realClient = cons(conn)
 }
 
-func (g *GrpcClient[T]) isGrpcMethod(t reflect.Type) bool {
+func (g *GrpcClient) isGrpcMethod(t reflect.Type) bool {
 	return t.NumIn() != 3 || t.NumOut() != 2
 }
 
-func (g *GrpcClient[T]) Invoke(context context.Context, method string, req T1, opts ...Option) (T2, error) {
+func (g *GrpcClient) Invoke(context context.Context, method any, req any, options *Options) (any, error) {
+	var handle reflect.Value
+	rm := reflect.ValueOf(method)
+	if rm.Kind() == reflect.String {
+		handle = reflect.ValueOf(g.realClient).MethodByName(rm.String())
+	}
+	if rm.Kind() == reflect.Func {
+		handle = rm.Elem()
+	}
 
-	handle := reflect.ValueOf(g.realClient).MethodByName(method)
 	if !g.isGrpcMethod(handle.Type()) {
 		return nil, ErrNotGrpcMethod
 	}
