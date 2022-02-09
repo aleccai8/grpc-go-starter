@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	implementMap = make(map[string]func(opt ...Option) Client)
+	implementMap = make(map[string]func[T](opt ...Option) Client[T])
 )
 
 func init() {
@@ -52,8 +52,10 @@ type Options struct {
 
 type Option func(opt *Options)
 
-type Client interface {
+type Client[T interface{}] interface {
 	Invoke(context context.Context, method string, req interface{}, opts ...Option) (interface{}, error)
+
+	RealClient() T
 
 	Register(realClient interface{}, opts ...Option)
 }
