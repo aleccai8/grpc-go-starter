@@ -34,6 +34,7 @@ func newClientWithConfig(cfg *Config, conf *ClientConfig, opt ...client.Option) 
 		fmt.Printf("service:%s discovery not exist\n", conf.ServiceName)
 	}
 	opts := []client.Option{
+		client.WithNamespace(conf.Namespace),
 		client.WithServiceName(conf.ServiceName),
 		//client.WithFilters(filters),
 		client.WithDiscovery(dis),

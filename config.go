@@ -110,6 +110,7 @@ type ServiceConfig struct {
 
 type ClientConfig struct {
 	Name        string   `yaml:"name"`
+	Namespace   string   `yaml:"namespace"`
 	ServiceName string   `yaml:"service_name"`
 	Protocol    string   `yaml:"protocol"`
 	Port        uint16   `yaml:"port"`
