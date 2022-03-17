@@ -1,17 +1,13 @@
 package client
 
 import (
-	"errors"
+	"context"
 	"github.com/zhengheng7913/grpc-go-starter/filter"
 	"github.com/zhengheng7913/grpc-go-starter/naming/discovery"
 )
 
 var (
 	implementMap = make(map[string]func(opts ...Option) Client)
-)
-
-var (
-	ErrClientInvalid = errors.New("err client invalid")
 )
 
 func init() {
@@ -47,17 +43,24 @@ func WithFilter(filters []filter.Filter) Option {
 	}
 }
 
+func WithSrcService(name string) Option {
+	return func(opt *Options) {
+		opt.SrcServiceName = name
+	}
+}
+
 type Options struct {
-	Discovery   discovery.Discovery
-	ServiceName string
-	Namespace   string
-	Filters     []filter.Filter
+	Discovery      discovery.Discovery
+	ServiceName    string
+	SrcServiceName string
+	Namespace      string
+	Filters        []filter.Filter
 }
 
 type Option func(opt *Options)
 
 type Client interface {
-	RealClient() any
+	RealClient(ctx context.Context) any
 
 	Register(realClient any, opts ...Option)
 }

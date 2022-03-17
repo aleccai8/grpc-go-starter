@@ -25,3 +25,9 @@ func WithContext(context context.Context) Option {
 		opt.Context = context
 	}
 }
+
+func WithSrcService(name string) Option {
+	return func(opt *Options) {
+		opt.SrcService = name
+	}
+}

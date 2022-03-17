@@ -21,8 +21,9 @@ const (
 )
 
 type Options struct {
-	Context   context.Context
-	Namespace string
+	Context    context.Context
+	Namespace  string
+	SrcService string
 }
 
 type Option func(opt *Options)

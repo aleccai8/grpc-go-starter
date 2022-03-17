@@ -3,7 +3,6 @@ package server
 import (
 	"github.com/zhengheng7913/grpc-go-starter/filter"
 	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
-	"google.golang.org/grpc"
 )
 
 type Options struct {
@@ -11,11 +10,9 @@ type Options struct {
 
 	ServiceName string
 
-	IP string
+	Host string
 
 	Port uint16
-
-	Address string
 
 	// GrpcGateway 代理的目标地址
 	Target string
@@ -28,10 +25,6 @@ type Options struct {
 }
 
 type Option func(*Options)
-
-func WithServiceRegisterAdapter(srv Service) grpc.ServiceRegistrar {
-	return newServiceRegisterAdapter(srv)
-}
 
 func WithNamespace(namespace string) Option {
 	return func(opt *Options) {
@@ -76,14 +69,8 @@ func WithFilters(fs filter.Chain) Option {
 	}
 }
 
-func WithIP(ip string) Option {
+func WithHost(ip string) Option {
 	return func(options *Options) {
-		options.IP = ip
-	}
-}
-
-func WithAddress(address string) Option {
-	return func(options *Options) {
-		options.Address = address
+		options.Host = ip
 	}
 }

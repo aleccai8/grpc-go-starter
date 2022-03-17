@@ -84,7 +84,7 @@ type Config struct {
 		Namespace     string `yaml:"namespace"`
 		EnvName       string `yaml:"env_name"`
 		ContainerName string `yaml:"container_name"`
-		LocalIP       string `yaml:"local_ip"`
+		Host          string `yaml:"host"`
 	}
 	Server struct {
 		Filters  []string         `yaml:"filters"`
@@ -102,21 +102,21 @@ type ServiceConfig struct {
 	ServiceName string   `yaml:"service_name"`
 	Protocol    string   `yaml:"protocol"`
 	Port        uint16   `yaml:"port"`
-	Address     string   `yaml:"address"`
 	Target      string   `yaml:"target"`
 	Registry    string   `yaml:"registry"`
 	Filters     []string `yaml:"filters"`
 }
 
 type ClientConfig struct {
-	Name        string   `yaml:"name"`
-	Namespace   string   `yaml:"namespace"`
-	ServiceName string   `yaml:"service_name"`
-	Protocol    string   `yaml:"protocol"`
-	Port        uint16   `yaml:"port"`
-	Address     string   `yaml:"address"`
-	Discovery   string   `yaml:"discovery"`
-	Filters     []string `yaml:"filters"`
+	Name           string   `yaml:"name"`
+	Namespace      string   `yaml:"namespace"`
+	ServiceName    string   `yaml:"service_name"`
+	SrcServiceName string   `yaml:"src_service_name"`
+	Protocol       string   `yaml:"protocol"`
+	Port           uint16   `yaml:"port"`
+	Address        string   `yaml:"address"`
+	Discovery      string   `yaml:"discovery"`
+	Filters        []string `yaml:"filters"`
 }
 
 // getShellName 获取占位符的key，即${var}里面的var内容

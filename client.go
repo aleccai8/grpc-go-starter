@@ -37,6 +37,7 @@ func newClientWithConfig(cfg *Config, conf *ClientConfig, opt ...client.Option) 
 		client.WithNamespace(conf.Namespace),
 		client.WithServiceName(conf.ServiceName),
 		//client.WithFilters(filters),
+		client.WithSrcService(conf.SrcServiceName),
 		client.WithDiscovery(dis),
 	}
 

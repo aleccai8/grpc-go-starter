@@ -1,5 +1,7 @@
 package client
 
+import "context"
+
 const HttpProtocol = "http"
 
 func NewHttpClient() Client {
@@ -9,7 +11,7 @@ func NewHttpClient() Client {
 type HttpClient struct {
 }
 
-func (h HttpClient) RealClient() any {
+func (h HttpClient) RealClient(ctx context.Context) any {
 	//TODO implement me
 	panic("implement me")
 }

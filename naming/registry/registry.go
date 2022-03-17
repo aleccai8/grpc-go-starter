@@ -17,7 +17,11 @@ type Registry interface {
 }
 
 type Options struct {
-	Address string
+	Namespace   string
+	ServiceName string
+	Host        string
+	Port        uint16
+	Protocol    string
 }
 
 type Option func(*Options)

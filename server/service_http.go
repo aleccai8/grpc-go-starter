@@ -2,10 +2,10 @@ package server
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/zhengheng7913/grpc-go-starter/naming/registry"
 	"google.golang.org/grpc/grpclog"
+	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -22,29 +22,32 @@ func NewHttpService(opts ...Option) Service {
 	}
 }
 
-func NewHttpServiceDesc(registrar HttpRegistrar) *ServiceDescHTTP {
-	return &ServiceDescHTTP{registrar: registrar}
-}
-
 type HttpService struct {
-	desc     *ServiceDescHTTP
+	factory  interface{}
 	server   *http.Server
 	serveMux *runtime.ServeMux
 	dialConn *grpc.ClientConn
 	opts     *Options
 }
 
-func (s *HttpService) Register(serviceDesc interface{}, nil interface{}) {
-	desc, ok := serviceDesc.(*ServiceDescHTTP)
-	if !ok {
-		fmt.Println(errors.New("service desc type invalid"))
-		return
-	}
-	s.desc = desc
-	filters := assertHttpOptions(s.opts.Filters)
-	opts := assertHttpOptions(s.opts.Others)
-	opts = append(opts, filters...)
+func (s *HttpService) Register(factory interface{}, _ interface{}) {
+	var opts []runtime.ServeMuxOption
+	opts = append(opts, arrayConvert[runtime.ServeMuxOption](s.opts.Filters)...)
+	opts = append(opts, arrayConvert[runtime.ServeMuxOption](s.opts.Others)...)
+	opts = append(opts,
+		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.HTTPBodyMarshaler{
+			&runtime.JSONPb{
+				MarshalOptions: protojson.MarshalOptions{
+					UseProtoNames:   true,
+					EmitUnpopulated: true,
+				},
+				UnmarshalOptions: protojson.UnmarshalOptions{
+					DiscardUnknown: true,
+				},
+			}}),
+	)
 	s.serveMux = runtime.NewServeMux(opts...)
+	s.factory = factory
 }
 
 func (s *HttpService) Serve() error {
@@ -58,18 +61,26 @@ func (s *HttpService) Serve() error {
 		return err
 	}
 	s.dialConn = conn
-	err = s.desc.registrar(context.Background(), s.serveMux, s.dialConn)
+	factory := s.factory.(func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error)
+	err = factory(context.Background(), s.serveMux, s.dialConn)
 	if err != nil {
 		return err
 	}
 	s.server = &http.Server{
 		// TODO: 添加ipport支持
-		Addr:    fmt.Sprintf("%v", s.opts.Address),
+		Addr:    fmt.Sprintf("%v:%v", s.opts.Host, s.opts.Port),
 		Handler: s.serveMux,
 	}
 	go func() {
 		defer s.opts.Registry.Deregister(s.opts.ServiceName)
-		err = s.opts.Registry.Register(s.opts.ServiceName, registry.WithAddress(s.opts.Address))
+		err = s.opts.Registry.Register(
+			s.opts.ServiceName,
+			registry.WithNamespace(s.opts.Namespace),
+			registry.WithHost(s.opts.Host),
+			registry.WithProtocol(ProtocolNameHTTP),
+			registry.WithServiceName(s.opts.ServiceName),
+			registry.WithPort(s.opts.Port),
+		)
 		if err != nil {
 			grpclog.Errorln(err)
 		}
@@ -84,19 +95,4 @@ func (s *HttpService) Serve() error {
 
 func (s HttpService) Close(c chan struct{}) error {
 	return s.server.Close()
-}
-
-type HttpRegistrar func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
-
-type ServiceDescHTTP struct {
-	registrar HttpRegistrar
-}
-
-func assertHttpOptions(inters []interface{}) []runtime.ServeMuxOption {
-	opts := make([]runtime.ServeMuxOption, 0)
-	for _, inter := range inters {
-		opt := inter.(runtime.ServeMuxOption)
-		opts = append(opts, opt)
-	}
-	return opts
 }

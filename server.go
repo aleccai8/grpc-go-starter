@@ -39,12 +39,13 @@ func newServiceWithConfig(cfg *Config, conf *ServiceConfig, opt ...server.Option
 		fmt.Printf("service:%s registry not exist\n", conf.ServiceName)
 	}
 	opts := []server.Option{
+		server.WithNamespace(cfg.Global.Namespace),
+		server.WithHost(cfg.Global.Host),
 		server.WithServiceName(conf.ServiceName),
 		server.WithPort(conf.Port),
 		server.WithTarget(conf.Target),
 		server.WithFilters(filters),
 		server.WithRegistry(reg),
-		server.WithAddress(conf.Address),
 	}
 
 	sc := server.Get(conf.Protocol)

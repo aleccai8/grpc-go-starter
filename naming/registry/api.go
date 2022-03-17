@@ -12,9 +12,32 @@ func Get(name string) Registry {
 	return registries[name]
 }
 
-// WithAddress 指定server监听地址 ip:port or :port
-func WithAddress(s string) Option {
-	return func(opts *Options) {
-		opts.Address = s
+func WithNamespace(namespace string) Option {
+	return func(options *Options) {
+		options.Namespace = namespace
+	}
+}
+
+func WithServiceName(name string) Option {
+	return func(options *Options) {
+		options.ServiceName = name
+	}
+}
+
+func WithPort(port uint16) Option {
+	return func(options *Options) {
+		options.Port = port
+	}
+}
+
+func WithProtocol(protocol string) Option {
+	return func(options *Options) {
+		options.Protocol = protocol
+	}
+}
+
+func WithHost(host string) Option {
+	return func(options *Options) {
+		options.Host = host
 	}
 }

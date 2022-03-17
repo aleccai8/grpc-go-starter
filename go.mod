@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
 	go.uber.org/automaxprocs v1.4.0
-	google.golang.org/grpc v1.41.0
+	google.golang.org/grpc v1.44.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
@@ -16,5 +16,5 @@ require (
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 	golang.org/x/text v0.3.5 // indirect
 	google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/protobuf v1.27.1
 )
