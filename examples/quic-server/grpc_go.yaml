@@ -1,0 +1,12 @@
+global:
+  namespace: ${namespace}
+  container_name: ${container_name}
+  host: ${local_ip}
+server:
+  app: quic
+  server: quic_server
+  services:
+    - name: QuicExample
+      service_name: grpc.quic_server.QuicExample
+      protocol: quic
+      port: 8090
